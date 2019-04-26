@@ -17,6 +17,9 @@ class RbacAuthorizationGate extends ApplicationComponent implements Authorizatio
 	/** @var boolean Free for all - доступен ли ресурс гостю, если права на него явно не указаны */
 	protected $ffa = true;
 
+	//TODO времянка
+	protected $mock;
+
 	/**
 	 *
 	 * */
@@ -69,9 +72,7 @@ class RbacAuthorizationGate extends ApplicationComponent implements Authorizatio
 	private function getRightsMap() {
 
 		//TODO
-		return [
-			'usertest:main' => ['client_r', 'client_w']
-		];
+		return $this->mock['rightsMap'];
 	}
 
 	/**
@@ -83,8 +84,12 @@ class RbacAuthorizationGate extends ApplicationComponent implements Authorizatio
 
 
 		//TODO
-		if ($user->id == 1) return ['client_r', 'client_w'];
-		return ['guest_r', 'guest_w'];
+		$map = $this->mock['userRights'];
+		if (array_key_exists((string)$user->id, $map)) {
+			return $map[$user->id];
+		}
+
+		return $map['default'];
 	}
 
 	/**
