@@ -184,6 +184,7 @@ class OAuth2AuthenticationGate extends ApplicationComponent implements Authentic
 			return false;
 		}
 
+		$user = $userManager->newModel();
 		$user->{$this->userLoginField} = $login;
 		$user->{$this->userPasswordField} = $password;
 		$user->save();
@@ -248,7 +249,7 @@ class OAuth2AuthenticationGate extends ApplicationComponent implements Authentic
 	/**
 	 *
 	 * */
-	public static function logOut($user = null) {
+	public function logOut($user = null) {
 		if ($user === null) {
 			$user = \lx::$components->user;
 			if ($user->isGuest()) {
@@ -260,16 +261,14 @@ class OAuth2AuthenticationGate extends ApplicationComponent implements Authentic
 		$time->modify('-5 minutes');
 		$time = $time->format('Y-m-d H:i:s');
 
-		$gate = \lx::$components->authenticationGate;
-
-		$manager = $gate->getModelManager('RefreshToken');
+		$manager = $this->getModelManager('RefreshToken');
 		$token = $manager->loadModel(['id_user' => $user->id]);
 		if ($token) {
 			$token->expire = $time;
 			$token->save();
 		}
 
-		$manager = $gate->getModelManager('AccessToken');
+		$manager = $this->getModelManager('AccessToken');
 		$token = $manager->loadModel(['id_user' => $user->id]);
 		if ($token) {
 			$token->expire = $time;

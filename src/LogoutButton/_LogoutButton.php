@@ -9,7 +9,8 @@ class LogoutButton extends Button {
 	 *
 	 * */
 	public static function logout() {
-		OAuth2AuthenticationGate::logOut();
+		$gate = \lx::$components->authenticationGate;
+		$gate->logOut();
 	}
 
 	/**
