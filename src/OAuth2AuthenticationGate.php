@@ -2,17 +2,15 @@
 
 namespace lx\auth;
 
+use lx\ApplicationComponent;
 use lx\ClassOfServiceInterface;
 use lx\ClassOfServiceTrait;
 use lx\AuthenticationInterface;
 
-/*
-Надо тут покопаться, посмотреть как люди делают, какие гранты есть, и сделать по аналогии
-https://github.com/thephpleague/oauth2-server
-https://oauth2.thephpleague.com/authorization-server/auth-code-grant/
-*/
-
-class OAuth2AuthenticationGate implements AuthenticationInterface, ClassOfServiceInterface {
+/**
+ *
+ * */
+class OAuth2AuthenticationGate extends ApplicationComponent implements AuthenticationInterface, ClassOfServiceInterface {
 	use ClassOfServiceTrait;
 
 	const AUTH_PROBLEM_NO = 0;
@@ -20,6 +18,14 @@ class OAuth2AuthenticationGate implements AuthenticationInterface, ClassOfServic
 	const AUTH_PROBLEM_TOKEN_NOT_FOUND = 10;
 	const AUTH_PROBLEM_TOKEN_EXPIRED = 15;
 	const AUTH_PROBLEM_USER_NOT_FOUND = 20;
+
+	protected $checkTokenModule = null;
+	protected $userAuthenticateFields = 'login';
+	protected $userLoginField = 'login';
+	protected $userPasswordField = 'password';
+	protected $accessTokenLifetime = 300;
+	protected $refreshTokenLifetime = 84600;
+	protected $tokenGenerator = null;
 
 	private $userModelName;
 	private $authProblem;
@@ -35,6 +41,8 @@ class OAuth2AuthenticationGate implements AuthenticationInterface, ClassOfServic
 	 * ]
 	 * */
 	public function __construct($config = []) {
+		parent::__construct($config);
+
 		$this->authProblem = self::AUTH_PROBLEM_NO;
 
 		$userModel = $config['userModel'];
@@ -94,12 +102,19 @@ class OAuth2AuthenticationGate implements AuthenticationInterface, ClassOfServic
 			// Группа проблем, где можно инициировать аутентификацию
 			case self::AUTH_PROBLEM_TOKEN_NOT_RETRIEVED:
 			case self::AUTH_PROBLEM_TOKEN_EXPIRED:
-				//todo иметь возможность подсунуть свой модуль
-
 				// Послать модуль, который поищет токен доступа
+				if ($this->checkTokenModule) {
+					$arr = explode(':', $this->checkTokenModule);
+					$service  = $arr[0];
+					$module = $arr[1];
+				} else {
+					$service = $this->getServiceName();
+					$module = 'getToken';
+				}
+
 				$responseSource->setData([
-					'service' => $this->getServiceName(),
-					'module' => 'getToken',
+					'service' => $service,
+					'module' => $module,
 				]);
 				break;
 
@@ -131,13 +146,19 @@ class OAuth2AuthenticationGate implements AuthenticationInterface, ClassOfServic
 	public function findUserByPassword($login, $password) {
 		$manager = $this->getUserManager();
 
-		//todo - имена полей для логина и пароля чтобы можно было определить в конфиге
-		$user = $manager->loadModel([
-			'email' => $login,
-			'password' => $password
-		]);
+		$fields = (array)$this->userAuthenticateFields;
+		foreach ($fields as $field) {
+			$user = $manager->loadModel([
+				$field => $login,
+				$this->userPasswordField => $password,
+			]);
 
-		return $user;
+			if ($user) {
+				return $user;
+			}
+		}
+
+		return null;
 	}
 
 	/**
@@ -146,8 +167,7 @@ class OAuth2AuthenticationGate implements AuthenticationInterface, ClassOfServic
 	public function registerUser($login, $password) {
 		$userManager = $this->getUserManager();
 
-		//todo - имя поля уникального логина надо определять в конфиге
-		$user = $userManager->loadModel(['email' => $login]);
+		$user = $userManager->loadModel([$this->userLoginField => $login]);
 		if ($user) {
 			\lx::$dialog->addMessage("Login \"$login\" already exists");
 			return false;
@@ -266,23 +286,27 @@ class OAuth2AuthenticationGate implements AuthenticationInterface, ClassOfServic
 	}
 
 	/**
-	 * //todo - чтобы было настраеваемо
+	 * 
 	 * */
 	private function getAccessTokenLifetime() {
-		return 60*5;
+		return $this->accessTokenLifetime;
 	}
 
 	/**
-	 * //todo - чтобы было настраеваемо
+	 * 
 	 * */
 	private function getRefreshTokenLifetime() {
-		return 60*60*24;
+		return $this->refreshTokenLifetime;
 	}
 
 	/**
-	 * //todo - чтобы можно было подсунуть алгоритм
+	 * 
 	 * */
 	private function genTokenForUser($user) {
-		return md5('' . $user->id . time() . rand(0, PHP_INT_MAX));
+		if ($this->tokenGenerator) {
+			return $this->tokenGenerator->generate();
+		} else {
+			return md5('' . $user->id . time() . rand(0, PHP_INT_MAX));
+		}
 	}
 }
