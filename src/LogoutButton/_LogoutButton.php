@@ -5,11 +5,19 @@ namespace lx\auth;
 use lx\Button;
 
 class LogoutButton extends Button {
-	public function __construct($config = []) {
-		parent::__construct($config);
+	/**
+	 *
+	 * */
+	public static function logout() {
+		OAuth2AuthenticationGate::logOut();
+	}
 
-		if (isset($config['url'])) {
-			$this->url = $config['url'];
-		}
+	/**
+	 *
+	 * */
+	protected static function ajaxMethods() {
+		return [
+			'logout',
+		];
 	}
 }
