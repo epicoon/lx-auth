@@ -134,6 +134,19 @@ class OAuth2AuthenticationGate extends ApplicationComponent implements Authentic
 	}
 
 	/**
+	 * Js-расширение для клиента
+	 * */
+	public function getJs() {
+		return "lx.auth = function(config){
+			let token = lx.Storage.get('lxauthtoken');
+			if (!token) return config;
+			if (!config.headers) config.headers = [];
+			config.headers['Authorization'] = token;
+			return config;
+		};";
+	}
+
+	/**
 	 * 
 	 * */
 	public function getUserManager() {
@@ -232,6 +245,38 @@ class OAuth2AuthenticationGate extends ApplicationComponent implements Authentic
 			$this->updateAccessTokenForUser($user),
 			$this->updateRefreshTokenForUser($user),
 		];
+	}
+
+	/**
+	 *
+	 * */
+	public static function logOut($user = null) {
+		if ($user === null) {
+			$user = \lx::$components->user;
+			if ($user->isGuest()) {
+				return;
+			}
+		}
+
+		$time = new \DateTime();
+		$time->modify('-5 minutes');
+		$time = $time->format('Y-m-d H:i:s');
+
+		$gate = \lx::$components->authenticationGate;
+
+		$manager = $gate->getModelManager('RefreshToken');
+		$token = $manager->loadModel(['id_user' => $user->id]);
+		if ($token) {
+			$token->expire = $time;
+			$token->save();
+		}
+
+		$manager = $gate->getModelManager('AccessToken');
+		$token = $manager->loadModel(['id_user' => $user->id]);
+		if ($token) {
+			$token->expire = $time;
+			$token->save();
+		}
 	}
 
 

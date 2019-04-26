@@ -9,6 +9,11 @@ autoload:
 service:
   class: lx\auth\Service
 
+  router:
+    type: map
+    routes:
+      logout: {static: lx\auth\OAuth2AuthenticationGate::logOut}
+
   modules: module
   models: model
   modelCrudAdapter: \lx\DbCrudAdapter
