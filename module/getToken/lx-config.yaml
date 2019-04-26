@@ -1,0 +1,9 @@
+class: lx\auth\module\getToken\Module
+
+view: view/_root.php
+
+jsMain: frontend/_main.js
+jsBootstrap: frontend/_bootstrap.js
+
+respondents:
+  Respondent: backend\Respondent

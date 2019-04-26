@@ -1,0 +1,6 @@
+RefreshToken:
+  table: auth.refresh_token
+  fields:
+    token: {type: string}
+    id_user: {type: string}
+    expire: {type: timestamp}

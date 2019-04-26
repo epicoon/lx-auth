@@ -1,0 +1,1 @@
+{"type":"table_create","model":"RefreshToken","schema":{"table":"auth.refresh_token","fields":{"token":{"type":"string"},"id_user":{"type":"string"},"expire":{"type":"timestamp"}}}}
