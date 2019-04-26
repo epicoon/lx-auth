@@ -12,9 +12,6 @@ function trySendToken() {
 	let token = lx.Storage.get('lxauthtoken');
 	let r = new lx.Request(window.location.pathname);
 	r.send().then((res)=>{
-
-		console.log(res);
-
 		if (res.success === false) {
 			if (res.message == 'expired') {
 				let refreshToken = lx.Storage.get('lxauthretoken');

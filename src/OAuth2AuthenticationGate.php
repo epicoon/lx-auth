@@ -184,8 +184,8 @@ class OAuth2AuthenticationGate extends ApplicationComponent implements Authentic
 			return false;
 		}
 
-		$user->email = $login;
-		$user->password = $password;
+		$user->{$this->userLoginField} = $login;
+		$user->{$this->userPasswordField} = $password;
 		$user->save();
 		return $user;
 	}
