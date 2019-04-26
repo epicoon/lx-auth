@@ -137,12 +137,10 @@ class OAuth2AuthenticationGate extends ApplicationComponent implements Authentic
 	 * Js-расширение для клиента
 	 * */
 	public function getJs() {
-		return "lx.auth = function(config){
+		return "lx.auth = function(request){
 			let token = lx.Storage.get('lxauthtoken');
-			if (!token) return config;
-			if (!config.headers) config.headers = [];
-			config.headers['Authorization'] = token;
-			return config;
+			if (!token) return;
+			request.setRequestHeader('Authorization', token);
 		};";
 	}
 

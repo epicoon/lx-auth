@@ -11,8 +11,10 @@ else new lx.auth.LoginForm();
 function trySendToken() {
 	let token = lx.Storage.get('lxauthtoken');
 	let r = new lx.Request(window.location.pathname);
-	r.setHeader('Authorization', token);
 	r.send().then((res)=>{
+
+		console.log(res);
+
 		if (res.success === false) {
 			if (res.message == 'expired') {
 				let refreshToken = lx.Storage.get('lxauthretoken');

@@ -75,6 +75,5 @@ function saveTokens(token, refreshToken) {
 	lx.Storage.set('lxauthretoken', refreshToken);
 
 	var r = new lx.Request(window.location.pathname);
-	r.setHeader('Authorization', token);
 	r.send().then((res)=>lx.body.injectModule(res));
 }
