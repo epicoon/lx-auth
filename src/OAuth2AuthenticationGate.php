@@ -4,15 +4,12 @@ namespace lx\auth;
 
 use lx\ApplicationComponent;
 use lx\ClassOfServiceInterface;
-use lx\ClassOfServiceTrait;
 use lx\AuthenticationInterface;
 
 /**
  *
  * */
-class OAuth2AuthenticationGate extends ApplicationComponent implements AuthenticationInterface, ClassOfServiceInterface {
-	use ClassOfServiceTrait;
-
+class OAuth2AuthenticationGate extends ApplicationComponent implements AuthenticationInterface {
 	const AUTH_PROBLEM_NO = 0;
 	const AUTH_PROBLEM_TOKEN_NOT_RETRIEVED = 5;
 	const AUTH_PROBLEM_TOKEN_NOT_FOUND = 10;
@@ -26,8 +23,9 @@ class OAuth2AuthenticationGate extends ApplicationComponent implements Authentic
 	protected $refreshTokenLifetime = 84600;
 	protected $tokenGenerator = null;
 
-	protected $checkTokenModule = null;
+	protected $checkTokenModule = 'lx/lx-auth:getToken';
 	protected $loginForm = 'lx.auth.LoginForm';
+	protected $tokenServiceName = 'lx/lx-auth';
 
 	private $userModelName;
 	private $authProblem;
@@ -110,15 +108,9 @@ class OAuth2AuthenticationGate extends ApplicationComponent implements Authentic
 			case self::AUTH_PROBLEM_TOKEN_NOT_RETRIEVED:
 			case self::AUTH_PROBLEM_TOKEN_EXPIRED:
 				// Послать модуль, который поищет токен доступа
-				if ($this->checkTokenModule) {
-					$arr = explode(':', $this->checkTokenModule);
-					$service  = $arr[0];
-					$module = $arr[1];
-				} else {
-					$service = $this->getServiceName();
-					$module = 'getToken';
-				}
-
+				$arr = explode(':', $this->checkTokenModule);
+				$service  = $arr[0];
+				$module = $arr[1];
 				$data = [
 					'service' => $service,
 					'module' => $module,
@@ -181,7 +173,7 @@ class OAuth2AuthenticationGate extends ApplicationComponent implements Authentic
 		foreach ($fields as $field) {
 			$user = $manager->loadModel([
 				$field => $login,
-				$this->userPasswordField => $password,
+				$this->userPasswordField => $this->getPasswordHash($password),
 			]);
 
 			if ($user) {
@@ -207,7 +199,7 @@ class OAuth2AuthenticationGate extends ApplicationComponent implements Authentic
 
 		$user = $userManager->newModel();
 		$user->{$this->userLoginField} = $login;
-		$user->{$this->userPasswordField} = $password;
+		$user->{$this->userPasswordField} = $this->getPasswordHash($password);
 		$user->save();
 		return $user;
 	}
@@ -295,6 +287,37 @@ class OAuth2AuthenticationGate extends ApplicationComponent implements Authentic
 			$token->expire = $time;
 			$token->save();
 		}
+	}
+
+
+	/**************************************************************************************************************************
+	 * PROTECTED
+	 *************************************************************************************************************************/
+
+	/**
+	 *
+	 * */
+	protected function getPasswordHash($password) {
+		$options = [
+			'salt' => md5($password),
+			'cost' => 12,
+		];
+		return password_hash($password, PASSWORD_DEFAULT, $options);
+	}
+
+	/**
+	 * Получить менеджер моделей сервиса для текущего класса
+	 *
+	 * @param $modelName string
+	 * @return lx\ModelManager|null
+	 * */
+	protected function getModelManager($modelName) {
+		$service = \lx::getService($this->tokenServiceName);
+		if (!$service) {
+			return null;
+		}
+
+		return $service->getModelManager($modelName);
 	}
 
 
