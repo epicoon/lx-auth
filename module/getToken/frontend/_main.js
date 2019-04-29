@@ -2,11 +2,9 @@
  * @const lx.Module Module
  * */
 
-#lx:widget lx.auth.LoginForm;
-
 let token = lx.Storage.get('lxauthtoken');
 if (token) trySendToken(token);
-else new lx.auth.LoginForm();
+else lx.createObject(Module.params.loginForm);
 
 function trySendToken() {
 	let token = lx.Storage.get('lxauthtoken');
@@ -16,13 +14,13 @@ function trySendToken() {
 			if (res.message == 'expired') {
 				let refreshToken = lx.Storage.get('lxauthretoken');
 				if (!refreshToken) {
-					new lx.auth.LoginForm();
+					lx.createObject(Module.params.loginForm);
 					return;
 				}
 
 				^Respondent.refreshTokens(refreshToken):(res)=>{
 					if (!res.token || !res.refreshToken) {
-						new lx.auth.LoginForm();
+						lx.createObject(Module.params.loginForm);
 						return;
 					}
 				
@@ -31,7 +29,7 @@ function trySendToken() {
 					trySendToken();
 				};
 			} else {
-				new lx.auth.LoginForm();
+				lx.createObject(Module.params.loginForm);
 			}
 			return;
 		}

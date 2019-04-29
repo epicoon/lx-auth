@@ -19,13 +19,15 @@ class OAuth2AuthenticationGate extends ApplicationComponent implements Authentic
 	const AUTH_PROBLEM_TOKEN_EXPIRED = 15;
 	const AUTH_PROBLEM_USER_NOT_FOUND = 20;
 
-	protected $checkTokenModule = null;
 	protected $userAuthenticateFields = 'login';
 	protected $userLoginField = 'login';
 	protected $userPasswordField = 'password';
 	protected $accessTokenLifetime = 300;
 	protected $refreshTokenLifetime = 84600;
 	protected $tokenGenerator = null;
+
+	protected $checkTokenModule = null;
+	protected $loginForm = 'lx.auth.LoginForm';
 
 	private $userModelName;
 	private $authProblem;
@@ -53,13 +55,18 @@ class OAuth2AuthenticationGate extends ApplicationComponent implements Authentic
 		}
 	}
 
+
+	/**************************************************************************************************************************
+	 * INTERFACE lx\AuthenticationInterface
+	 *************************************************************************************************************************/
+
 	/**
 	 * Попытка аутентифицировать пользователя:
 	 * - Проверяем данные запроса (заголовок Authorization, куки) - ищем токен доступа
 	 * - Если токен не найден или закончился срок действия - компонент "пользователь" остается гостем
 	 * - По токену ищем модель AccessToken
 	 * - Если модель не найдена - компонент "пользователь" остается гостем
-	 * - По полю модели "id_user" ищем модель пользователя
+	 * - По полю логина модели ищем модель пользователя
 	 * - Если модель пользователя не найдена - компонент "пользователь" остается гостем
 	 * */
 	public function authenticateUser() {
@@ -85,7 +92,7 @@ class OAuth2AuthenticationGate extends ApplicationComponent implements Authentic
 		}
 
 		$userManager = $this->getUserManager();
-		$user = $userManager->loadModel($accessTokenModel->id_user);
+		$user = $userManager->loadModel([$this->userLoginField => $accessTokenModel->user_login]);
 		if (!$user) {
 			$this->authProblem = self::AUTH_PROBLEM_USER_NOT_FOUND;
 			return;
@@ -112,10 +119,18 @@ class OAuth2AuthenticationGate extends ApplicationComponent implements Authentic
 					$module = 'getToken';
 				}
 
-				$responseSource->setData([
+				$data = [
 					'service' => $service,
 					'module' => $module,
-				]);
+				];
+				if ($this->loginForm) {
+					$data['clientParams'] = [
+						'loginForm' => $this->loginForm,
+					];
+					$data['widgets'] = [$this->loginForm];
+				}
+
+				$responseSource->setData($data);
 				break;
 
 			// Группа проблем, не разрешающихся аутентификацией
@@ -143,6 +158,11 @@ class OAuth2AuthenticationGate extends ApplicationComponent implements Authentic
 			request.setRequestHeader('Authorization', token);
 		};";
 	}
+
+
+	/**************************************************************************************************************************
+	 * PUBLIC
+	 *************************************************************************************************************************/
 
 	/**
 	 * 
@@ -180,6 +200,7 @@ class OAuth2AuthenticationGate extends ApplicationComponent implements Authentic
 
 		$user = $userManager->loadModel([$this->userLoginField => $login]);
 		if ($user) {
+			\lx::$dialog->useMessages();
 			\lx::$dialog->addMessage("Login \"$login\" already exists");
 			return false;
 		}
@@ -238,7 +259,7 @@ class OAuth2AuthenticationGate extends ApplicationComponent implements Authentic
 		}
 
 		$manager = $this->getUserManager();
-		$user = $manager->loadModel($refreshTokenModel->id_user);
+		$user = $manager->loadModel([$this->userLoginField => $refreshTokenModel->user_login]);
 
 		return [
 			$this->updateAccessTokenForUser($user),
@@ -262,14 +283,14 @@ class OAuth2AuthenticationGate extends ApplicationComponent implements Authentic
 		$time = $time->format('Y-m-d H:i:s');
 
 		$manager = $this->getModelManager('RefreshToken');
-		$token = $manager->loadModel(['id_user' => $user->id]);
+		$token = $manager->loadModel(['user_login' => $user->{$this->userLoginField}]);
 		if ($token) {
 			$token->expire = $time;
 			$token->save();
 		}
 
 		$manager = $this->getModelManager('AccessToken');
-		$token = $manager->loadModel(['id_user' => $user->id]);
+		$token = $manager->loadModel(['user_login' => $user->{$this->userLoginField}]);
 		if ($token) {
 			$token->expire = $time;
 			$token->save();
@@ -313,10 +334,10 @@ class OAuth2AuthenticationGate extends ApplicationComponent implements Authentic
 	 *
 	 * */
 	private function updateTokenForUser($user, $manager, $lifetime) {
-		$token = $manager->loadModel(['id_user' => $user->id]);
+		$token = $manager->loadModel(['user_login' => $user->{$this->userLoginField}]);
 		if (!$token) {
 			$token = $manager->newModel();
-			$token->id_user = $user->id;
+			$token->user_login = $user->{$this->userLoginField};
 		}
 
 		$token->token = $this->genTokenForUser($user);
