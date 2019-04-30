@@ -3,8 +3,6 @@
 namespace lx\auth;
 
 use lx\ApplicationComponent;
-use lx\ClassOfServiceInterface;
-use lx\ClassOfServiceTrait;
 use lx\AuthorizationInterface;
 use lx\ResponseSource;
 
@@ -12,10 +10,9 @@ use lx\ResponseSource;
  *
  * */
 class RbacAuthorizationGate extends ApplicationComponent implements AuthorizationInterface {
-	use ClassOfServiceTrait;
-
 	/** @var boolean Free for all - доступен ли ресурс гостю, если права на него явно не указаны */
 	protected $ffa = true;
+	protected $authModuleName = 'lx/lx-auth:authManage';
 
 	//TODO времянка
 	protected $mock;
@@ -51,6 +48,13 @@ class RbacAuthorizationGate extends ApplicationComponent implements Authorizatio
 		}
 
 		return $responseSource;
+	}
+
+	/**
+	 *
+	 * */
+	public function getManageModule() {
+		return \lx::getModule($this->authModuleName);
 	}
 
 	/**
