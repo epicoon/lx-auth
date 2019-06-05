@@ -1,0 +1,1 @@
+{"type":"table_create","model":"AccessToken","schema":{"fields":{"token":{"type":"string"},"user_login":{"type":"string"},"expire":{"type":"timestamp"}}}}

@@ -1,5 +1,4 @@
 AccessToken:
-  table: auth.access_token
   fields:
     token: {type: string}
     user_login: {type: string}
