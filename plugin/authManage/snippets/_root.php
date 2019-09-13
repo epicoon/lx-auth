@@ -1,10 +1,10 @@
 <?php
 /**
- * @var lx\Module $Module
- * @var lx\Block $Block
+ * @var lx\Plugin $Plugin
+ * @var lx\Snippet $Snippet
  * */
 
-$Block->fill('white');
+$Snippet->fill('white');
 
 
 $head = new lx\Box([

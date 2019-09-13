@@ -1,6 +1,6 @@
 <?php
 
-namespace lx\auth\module\authManage\backend;
+namespace lx\auth\plugin\authManage\backend;
 
 class Respondent extends \lx\Respondent {
 

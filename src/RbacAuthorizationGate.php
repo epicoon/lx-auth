@@ -12,7 +12,7 @@ use lx\ResponseSource;
 class RbacAuthorizationGate extends ApplicationComponent implements AuthorizationInterface {
 	/** @var boolean Free for all - доступен ли ресурс гостю, если права на него явно не указаны */
 	protected $ffa = true;
-	protected $authModuleName = 'lx/lx-auth:authManage';
+	protected $authPluginName = 'lx/lx-auth:authManage';
 
 	//TODO времянка
 	protected $mock;
@@ -28,15 +28,30 @@ class RbacAuthorizationGate extends ApplicationComponent implements Authorizatio
 	 *
 	 * */
 	public function checkAccess($user, $responseSource) {
+		if (!is_bool($responseSource)) {
+			$r = $_SERVER;
+
+			$e = 1;
+		}
+		if (is_bool($responseSource)) {
+			$r = $_SERVER;
+
+			$e = 1;
+		}
+
 		$rights = $this->getRightsForSource($responseSource);
 		// var_dump($rights);
-		
+
+
+		//TODO времянка
 		if ($rights === false) {
 			$responseSource->addRestriction(ResponseSource::RESTRICTION_FORBIDDEN_FOR_ALL);
 			return $responseSource;
 		} elseif ($rights === true) {
 			return $responseSource;
 		}
+		//!!!!!!!!!!
+
 
 		$userRights = $this->getUserRights($user);
 		// var_dump($userRights);
@@ -53,8 +68,8 @@ class RbacAuthorizationGate extends ApplicationComponent implements Authorizatio
 	/**
 	 *
 	 * */
-	public function getManageModule() {
-		return \lx::getModule($this->authModuleName);
+	public function getManagePlugin() {
+		return $this->app->getPlugin($this->authPluginName);
 	}
 
 	/**

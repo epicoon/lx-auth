@@ -2,23 +2,17 @@
 
 namespace lx\auth;
 
-use lx\Button;
+use lx\Rect;
 
-class LogoutButton extends Button {
-	/**
-	 *
-	 * */
-	public static function logout() {
-		$gate = \lx::$components->authenticationGate;
-		$gate->logOut();
-	}
-
-	/**
-	 *
-	 * */
+class LogoutButton extends Rect {
 	protected static function ajaxMethods() {
 		return [
 			'logout',
 		];
+	}
+
+	public function logout() {
+		$gate = $this->app->authenticationGate;
+		$gate->logOut();
 	}
 }

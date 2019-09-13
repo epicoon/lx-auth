@@ -2,24 +2,21 @@
 
 namespace lx\auth;
 
-use lx\Box;
+use lx\Rect;
 
 /**
  * Форма логина
  * */
-class LoginForm extends Box {
-	/**
-	 *
-	 * */
-	public function __construct($config = []) {
-		parent::__construct($config);
+class LoginForm extends Rect {
+	protected static function ajaxMethods() {
+		return [
+			'login',
+			'register',
+		];
 	}
 
-	/**
-	 *
-	 * */
-	public static function login($login, $password) {
-		$gate = \lx::$components->authenticationGate;
+	public function login($login, $password) {
+		$gate = $this->app->authenticationGate;
 
 		$user = $gate->findUserByPassword($login, $password);
 		if (!$user) {
@@ -38,11 +35,8 @@ class LoginForm extends Box {
 		];
 	}
 
-	/**
-	 *
-	 * */
-	public static function register($login, $password) {
-		$gate = \lx::$components->authenticationGate;
+	public function register($login, $password) {
+		$gate = $this->app->authenticationGate;
 
 		$user = $gate->registerUser($login, $password);
 		if (!$user) {
@@ -57,16 +51,6 @@ class LoginForm extends Box {
 			'result' => true,
 			'token' => 'Bearer ' . $accessTokenModel->token,
 			'refreshToken' => 'Bearer ' . $refreshTokenModel->token,
-		];
-	}
-
-	/**
-	 *
-	 * */
-	protected static function ajaxMethods() {
-		return [
-			'login',
-			'register',
 		];
 	}
 }

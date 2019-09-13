@@ -1,6 +1,6 @@
-class: lx\auth\module\getToken\Module
+class: lx\auth\plugin\getToken\Plugin
 
-view: view/_root.php
+rootSnippet: snippets/_root.js
 
 jsMain: frontend/_main.js
 jsBootstrap: frontend/_bootstrap.js

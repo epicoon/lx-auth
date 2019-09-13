@@ -1,11 +1,11 @@
+#lx:module lx.auth.LogoutButton;
+
+#lx:use lx.Button;
+
 class LogoutButton extends lx.Button #lx:namespace lx.auth {
-	/**
-	 *
-	 * */
-	postBuild(config) {
+	#lx:client postBuild(config) {
 		super.postBuild(config);
 
-		this.addClass('lx-Button');
 		this.click(()=>{
 			^self::logout():(res)=>{location.reload()};
 		});

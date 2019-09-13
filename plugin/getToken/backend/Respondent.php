@@ -1,10 +1,10 @@
 <?php
 
-namespace lx\auth\module\getToken\backend;
+namespace lx\auth\plugin\getToken\backend;
 
 class Respondent extends \lx\Respondent {
 	public function refreshTokens($refreshToken) {
-		$gate = \lx::$components->authenticationGate;
+		$gate = $this->app->authenticationGate;
 
 		$pare = $gate->refreshTokens($refreshToken);
 		if ($pare === false) {

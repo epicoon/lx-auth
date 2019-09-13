@@ -1,3 +1,0 @@
-/**
- * @const lx.Module Module
- * */

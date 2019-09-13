@@ -1,6 +1,6 @@
-class: lx\auth\module\authManage\Module
+class: lx\auth\plugin\authManage\Plugin
 
-view: view/_root.php
+rootSnippet: snippets/_root.php
 
 jsMain: frontend/_main.js
 jsBootstrap: frontend/_bootstrap.js

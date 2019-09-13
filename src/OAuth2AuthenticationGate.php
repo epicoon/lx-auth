@@ -23,7 +23,7 @@ class OAuth2AuthenticationGate extends ApplicationComponent implements Authentic
 	protected $refreshTokenLifetime = 84600;
 	protected $tokenGenerator = null;
 
-	protected $checkTokenModule = 'lx/lx-auth:getToken';
+	protected $checkTokenPlugin = 'lx/lx-auth:getToken';
 	protected $loginForm = 'lx.auth.LoginForm';
 	protected $tokenServiceName = 'lx/lx-auth';
 
@@ -84,7 +84,7 @@ class OAuth2AuthenticationGate extends ApplicationComponent implements Authentic
 		$now = (new \DateTime())->format('Y-m-d H:i:s');
 		$expire = (new \DateTime($accessTokenModel->expire))->format('Y-m-d H:i:s');
 		if ($expire <= $now) {
-			\lx::$dialog->addMessage('expired');
+			$this->app->dialog->addMessage('expired');
 			$this->authProblem = self::AUTH_PROBLEM_TOKEN_EXPIRED;
 			return;
 		}
@@ -96,7 +96,7 @@ class OAuth2AuthenticationGate extends ApplicationComponent implements Authentic
 			return;
 		}
 
-		\lx::$components->user->setData($user);
+		$this->app->user->setData($user);
 	}
 
 	/**
@@ -108,18 +108,20 @@ class OAuth2AuthenticationGate extends ApplicationComponent implements Authentic
 			case self::AUTH_PROBLEM_TOKEN_NOT_RETRIEVED:
 			case self::AUTH_PROBLEM_TOKEN_EXPIRED:
 				// Послать модуль, который поищет токен доступа
-				$arr = explode(':', $this->checkTokenModule);
+				$arr = explode(':', $this->checkTokenPlugin);
 				$service  = $arr[0];
-				$module = $arr[1];
+				$plugin = $arr[1];
 				$data = [
 					'service' => $service,
-					'module' => $module,
+					'plugin' => $plugin,
 				];
 				if ($this->loginForm) {
 					$data['clientParams'] = [
 						'loginForm' => $this->loginForm,
 					];
-					$data['widgets'] = [$this->loginForm];
+					$data['dependencies'] = [
+						'modules' => [$this->loginForm],
+					];
 				}
 
 				$responseSource->setData($data);
@@ -133,7 +135,7 @@ class OAuth2AuthenticationGate extends ApplicationComponent implements Authentic
 				// Токен мы получили, но в своей системе не нашли - подозрительная ситуация
 				return false;
 			case self::AUTH_PROBLEM_USER_NOT_FOUND:
-				// Токен получили, нашли, но не нашли по нему пользователя - возможно ошибка сервера
+				// Токен получили, нашли, но не нашли по нему пользователя - возможно ошибка базы
 				return false;
 		}
 
@@ -160,7 +162,7 @@ class OAuth2AuthenticationGate extends ApplicationComponent implements Authentic
 	 * 
 	 * */
 	public function getUserManager() {
-		return \lx::getModelManager($this->userModelName);
+		return $this->app->getModelManager($this->userModelName);
 	}
 
 	/**
@@ -192,8 +194,8 @@ class OAuth2AuthenticationGate extends ApplicationComponent implements Authentic
 
 		$user = $userManager->loadModel([$this->userLoginField => $login]);
 		if ($user) {
-			\lx::$dialog->useMessages();
-			\lx::$dialog->addMessage("Login \"$login\" already exists");
+			$this->app->dialog->useMessages();
+			$this->app->dialog->addMessage("Login \"$login\" already exists");
 			return false;
 		}
 
@@ -246,7 +248,7 @@ class OAuth2AuthenticationGate extends ApplicationComponent implements Authentic
 		$now = (new \DateTime())->format('Y-m-d H:i:s');
 		$expire = (new \DateTime($refreshTokenModel->expire))->format('Y-m-d H:i:s');
 		if ($expire <= $now) {
-			\lx::$dialog->addMessage('expired');
+			$this->app->dialog->addMessage('expired');
 			return false;
 		}
 
@@ -264,7 +266,7 @@ class OAuth2AuthenticationGate extends ApplicationComponent implements Authentic
 	 * */
 	public function logOut($user = null) {
 		if ($user === null) {
-			$user = \lx::$components->user;
+			$user = $this->app->user;
 			if ($user->isGuest()) {
 				return;
 			}
@@ -312,7 +314,7 @@ class OAuth2AuthenticationGate extends ApplicationComponent implements Authentic
 	 * @return lx\ModelManager|null
 	 * */
 	protected function getModelManager($modelName) {
-		$service = \lx::getService($this->tokenServiceName);
+		$service = $this->app->getService($this->tokenServiceName);
 		if (!$service) {
 			return null;
 		}
@@ -331,12 +333,12 @@ class OAuth2AuthenticationGate extends ApplicationComponent implements Authentic
 	private function retrieveToken() {
 		$token = null;
 
-		$authHeader = \lx::$dialog->header('Authorization');
+		$authHeader = $this->app->dialog->header('Authorization');
 		if ($authHeader) {
 			$token = $authHeader;
 		}
 
-		$authCookie = \lx::$dialog->cookie()->getFirstDefined(['auth', 'authorization', 'token'], false);
+		$authCookie = $this->app->dialog->cookie()->getFirstDefined(['auth', 'authorization', 'token'], false);
 		if ($authCookie) {
 			$token = $authCookie;
 		}
