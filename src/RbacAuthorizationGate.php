@@ -6,28 +6,21 @@ use lx\ApplicationComponent;
 use lx\AuthorizationInterface;
 use lx\ResponseSource;
 
-/**
- *
- * */
-class RbacAuthorizationGate extends ApplicationComponent implements AuthorizationInterface {
-	/** @var boolean Free for all - доступен ли ресурс гостю, если права на него явно не указаны */
-	protected $ffa = true;
+class RbacAuthorizationGate extends ApplicationComponent implements AuthorizationInterface
+{
 	protected $authPluginName = 'lx/lx-auth:authManage';
 
 	//TODO времянка
 	protected $mock;
 
-	/**
-	 *
-	 * */
-	public function __construct($config = []) {
+	public function __construct($config = [])
+	{
 		parent::__construct($config);
 	}
 
-	/**
-	 *
-	 * */
-	public function checkAccess($user, $responseSource) {
+	public function checkAccess($user, $responseSource)
+	{
+		//TODO
 		if (!is_bool($responseSource)) {
 			$r = $_SERVER;
 
@@ -40,21 +33,7 @@ class RbacAuthorizationGate extends ApplicationComponent implements Authorizatio
 		}
 
 		$rights = $this->getRightsForSource($responseSource);
-		// var_dump($rights);
-
-
-		//TODO времянка
-		if ($rights === false) {
-			$responseSource->addRestriction(ResponseSource::RESTRICTION_FORBIDDEN_FOR_ALL);
-			return $responseSource;
-		} elseif ($rights === true) {
-			return $responseSource;
-		}
-		//!!!!!!!!!!
-
-
 		$userRights = $this->getUserRights($user);
-		// var_dump($userRights);
 		foreach ($rights as $right) {
 			if (!in_array($right, $userRights)) {
 				$responseSource->addRestriction(ResponseSource::RESTRICTION_INSUFFICIENT_RIGHTS);
@@ -65,39 +44,40 @@ class RbacAuthorizationGate extends ApplicationComponent implements Authorizatio
 		return $responseSource;
 	}
 
-	/**
-	 *
-	 * */
-	public function getManagePlugin() {
+	public function getManagePlugin()
+	{
 		return $this->app->getPlugin($this->authPluginName);
 	}
 
 	/**
-	 *
-	 * */
-	private function getRightsForSource($responseSource) {
-		$map = $this->getRightsMap();
+	 * @param $responseSource ResponseSource
+	 * @return array
+	 */
+	private function getRightsForSource($responseSource)
+	{
+		$map = $this->getResourceRightsMap();
 		$key = $responseSource->getSourceName();
-		if (array_key_exists($key, $map)) {
-			return $map[$key];
-		} else {
-			return $this->ffa;
-		}
+		return array_key_exists($key, $map)
+			? $map[$key]
+			: $this->getDefaultResourceRights();
 	}
 
-	/**
-	 *
-	 * */
-	private function getRightsMap() {
+	private function getResourceRightsMap()
+	{
 
 		//TODO
 		return $this->mock['rightsMap'];
 	}
 
-	/**
-	 *
-	 * */
-	private function getUserRights($user) {
+	private function getDefaultResourceRights()
+	{
+
+		//TODO
+		return $this->mock['defaultResourceRights'];
+	}
+
+	private function getUserRights($user)
+	{
 		// $role = $this->getUserRole($user);
 		// ...
 
@@ -108,13 +88,11 @@ class RbacAuthorizationGate extends ApplicationComponent implements Authorizatio
 			return $map[$user->id];
 		}
 
-		return $map['default'];
+		return $this->mock['defaultUserRights'];
 	}
 
-	/**
-	 *
-	 * */
-	private function getUserRole($user) {
+	private function getUserRole($user)
+	{
 
 		//TODO
 		return 'client';
