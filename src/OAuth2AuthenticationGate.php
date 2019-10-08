@@ -23,9 +23,9 @@ class OAuth2AuthenticationGate extends ApplicationComponent implements Authentic
 	protected $refreshTokenLifetime = 84600;
 	protected $tokenGenerator = null;
 
+	protected $tokenServiceName = 'lx/lx-auth';
 	protected $checkTokenPlugin = 'lx/lx-auth:getToken';
 	protected $loginForm = 'lx.auth.LoginForm';
-	protected $tokenServiceName = 'lx/lx-auth';
 
 	private $userModelName;
 	private $authProblem;

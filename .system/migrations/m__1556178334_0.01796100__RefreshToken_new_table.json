@@ -1,1 +1,1 @@
-{"type":"table_create","model":"RefreshToken","schema":{"fields":{"token":{"type":"string"},"user_login":{"type":"string"},"expire":{"type":"timestamp"}}}}
+{"type":"new_table","model":"RefreshToken","schema":{"fields":{"token":{"type":"string"},"user_login":{"type":"string"},"expire":{"type":"timestamp"}}}}

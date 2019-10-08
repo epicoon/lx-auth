@@ -8,7 +8,8 @@ use lx\ResponseSource;
 
 class RbacAuthorizationGate extends ApplicationComponent implements AuthorizationInterface
 {
-	protected $authPluginName = 'lx/lx-auth:authManage';
+	protected $rbacServiceName = 'lx/lx-auth';
+	protected $rbacManagePluginName = 'lx/lx-auth:authManage';
 
 	//TODO времянка
 	protected $mock;
@@ -20,18 +21,6 @@ class RbacAuthorizationGate extends ApplicationComponent implements Authorizatio
 
 	public function checkAccess($user, $responseSource)
 	{
-		//TODO
-		if (!is_bool($responseSource)) {
-			$r = $_SERVER;
-
-			$e = 1;
-		}
-		if (is_bool($responseSource)) {
-			$r = $_SERVER;
-
-			$e = 1;
-		}
-
 		$rights = $this->getRightsForSource($responseSource);
 		$userRights = $this->getUserRights($user);
 		foreach ($rights as $right) {
@@ -44,9 +33,23 @@ class RbacAuthorizationGate extends ApplicationComponent implements Authorizatio
 		return $responseSource;
 	}
 
+	public function getService()
+	{
+		return $this->app->getService($this->rbacServiceName);
+	}
+
 	public function getManagePlugin()
 	{
-		return $this->app->getPlugin($this->authPluginName);
+		return $this->app->getPlugin($this->rbacManagePluginName);
+	}
+
+	protected function getModelManager($modelName) {
+		$service = $this->getService();
+		if (!$service) {
+			return null;
+		}
+
+		return $service->getModelManager($modelName);
 	}
 
 	/**
@@ -61,6 +64,11 @@ class RbacAuthorizationGate extends ApplicationComponent implements Authorizatio
 			? $map[$key]
 			: $this->getDefaultResourceRights();
 	}
+
+
+
+
+
 
 	private function getResourceRightsMap()
 	{
@@ -78,8 +86,7 @@ class RbacAuthorizationGate extends ApplicationComponent implements Authorizatio
 
 	private function getUserRights($user)
 	{
-		// $role = $this->getUserRole($user);
-		// ...
+
 
 
 		//TODO
@@ -91,12 +98,11 @@ class RbacAuthorizationGate extends ApplicationComponent implements Authorizatio
 		return $this->mock['defaultUserRights'];
 	}
 
-	private function getUserRole($user)
-	{
 
-		//TODO
-		return 'client';
-	}
+
+
+
+
 
 
 
