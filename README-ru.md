@@ -24,17 +24,6 @@
 
 	'authorizationGate' => [
 		'class' => lx\auth\RbacAuthorizationGate::class,
-		'ffa' => true,
-
-		'mock' => [
-			'rightsMap' => [
-				'usertest:main' => ['client_r', 'client_w']
-			],
-			'userRights' => [
-				'default' => ['guest_r', 'guest_w'],
-				'1' => ['client_r', 'client_w'],
-			],
-		],
 	],
 	//...
 ]
