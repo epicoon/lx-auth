@@ -1,0 +1,7 @@
+AuthRole:
+  fields:
+    name: {type: string}
+
+  relations:
+    rights: AuthRight[]
+    userRoles: AuthUserRole[]

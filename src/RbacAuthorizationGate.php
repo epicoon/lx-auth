@@ -4,15 +4,14 @@ namespace lx\auth;
 
 use lx\ApplicationComponent;
 use lx\AuthorizationInterface;
+use lx\ModelCollection;
 use lx\ResponseSource;
+use lx\User;
 
 class RbacAuthorizationGate extends ApplicationComponent implements AuthorizationInterface
 {
 	protected $rbacServiceName = 'lx/lx-auth';
 	protected $rbacManagePluginName = 'lx/lx-auth:authManage';
-
-	//TODO времянка
-	protected $mock;
 
 	public function __construct($config = [])
 	{
@@ -24,7 +23,7 @@ class RbacAuthorizationGate extends ApplicationComponent implements Authorizatio
 		$rights = $this->getRightsForSource($responseSource);
 		$userRights = $this->getUserRights($user);
 		foreach ($rights as $right) {
-			if (!in_array($right, $userRights)) {
+			if ( ! in_array($right, $userRights)) {
 				$responseSource->addRestriction(ResponseSource::RESTRICTION_INSUFFICIENT_RIGHTS);
 				break;
 			}
@@ -58,76 +57,79 @@ class RbacAuthorizationGate extends ApplicationComponent implements Authorizatio
 	 */
 	private function getRightsForSource($responseSource)
 	{
-		$map = $this->getResourceRightsMap();
-		$key = $responseSource->getSourceName();
-		return array_key_exists($key, $map)
-			? $map[$key]
-			: $this->getDefaultResourceRights();
-	}
+		$sourceRightManager = $this->getModelManager('AuthSourceRight');
+		$sourceRightModel = $sourceRightManager->loadModel([
+			'source_name' => $responseSource->getSourceName()
+		]);
 
+		if ( ! $sourceRightModel) {
+			return $this->getDefaultResourceRights();
+		}
 
-
-
-
-
-	private function getResourceRightsMap()
-	{
-
-		//TODO
-		return $this->mock['rightsMap'];
+		return $sourceRightModel->rights->getField('name');
 	}
 
 	private function getDefaultResourceRights()
 	{
-
-		//TODO
-		return $this->mock['defaultResourceRights'];
-	}
-
-	private function getUserRights($user)
-	{
-
-
-
-		//TODO
-		$map = $this->mock['userRights'];
-		if (array_key_exists((string)$user->id, $map)) {
-			return $map[$user->id];
+		$defaultListManager = $this->getModelManager('AuthDefaultList');
+		$defaultRightsData = $defaultListManager->loadModels(['type' => 'right']);
+		if ($defaultRightsData->isEmpty()) {
+			return [];
 		}
 
-		return $this->mock['defaultUserRights'];
+		$rightManager = $this->getModelManager('AuthRight');
+		return $rightManager->loadModels($defaultRightsData->getField('id_item'))->getField('name');
 	}
 
+	/**
+	 * @param $user User
+	 * @return mixed
+	 */
+	private function getUserRights($user)
+	{
+		$roles = $this->getUserRoles($user);
+		$rights = $roles->getField('rights');
+		$result = [];
+		foreach ($rights as $rightList) {
+			foreach ($rightList as $right) {
+				$rightName = $right->name;
+				if (array_search($rightName, $result) === false) {
+					$result[] = $rightName;
+				}
+			}
+		}
 
+		return $result;
+	}
 
+	private function getUserRoles($user)
+	{
+		$defaultRoles = $this->getDefaultRoles();
+		if ($user->isGuest()) {
+			return $defaultRoles;
+		}
 
+		$userRoleManager = $this->getModelManager('AuthUserRole');
+		$userRoleModel = $userRoleManager->loadModel([
+			'user_auth_data' => $user->{$user->getAuthFieldName()}
+		]);
+		if ( ! $userRoleModel) {
+			return $defaultRoles;
+		}
 
+		return $defaultRoles->merge($userRoleModel->roles);
+	}
 
+	private function getDefaultRoles()
+	{
+		$defaultListManager = $this->getModelManager('AuthDefaultList');
+		$models = $defaultListManager->loadModels(['type' => 'role']);
+		if ( ! $models) {
+			return [];
+		}
 
-
-
-
-	/*
-	у пользователя есть роль
-	за ролью закреплен список доступных прав
-	роль может включать в себя другие роли, н-р [[admin]] включает права [[user]]
-
-	роль влияет на доступ к роутам (при использовании опции [[for]])
-
-	право влияет на доступ к роутам (при использовании опции [[right]])
-	право влияет на исполнение метода респондента, настраивается в респонденте
-	право влияет на исполнение экшена (класса), настраивается в экшене
-	право влияет на исполнение экшена контроллера, настраивается в контроллере
-
-	??????
-	! как добавить права специфичные для конкретного сервиса
-	имя права будет выглядеть как %имя/сервиса%.%имя_права%
-
-
-	Нужны модули для управления:
-	- списком прав
-	- деревом ролей
-	- назначением ролей юзерам
-	- мониторинг внутренних прав подключаемых сервисов
-	*/
+		$roleManager = $this->getModelManager('AuthRole');
+		$roles = $roleManager->loadModels($models->getField('id_item'));
+		return $roles;
+	}
 }

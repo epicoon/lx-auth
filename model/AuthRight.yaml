@@ -1,0 +1,7 @@
+AuthRight:
+  fields:
+    name: {type: string}
+
+  relations:
+    roles: AuthRole[]
+    sourceRights: AuthSourceRight[]

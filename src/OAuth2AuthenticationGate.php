@@ -16,8 +16,8 @@ class OAuth2AuthenticationGate extends ApplicationComponent implements Authentic
 	const AUTH_PROBLEM_TOKEN_EXPIRED = 15;
 	const AUTH_PROBLEM_USER_NOT_FOUND = 20;
 
-	protected $userAuthenticateFields = 'login';
-	protected $userLoginField = 'login';
+	protected $userAuthFields = 'login';
+	protected $userAuthField = 'login';
 	protected $userPasswordField = 'password';
 	protected $accessTokenLifetime = 300;
 	protected $refreshTokenLifetime = 84600;
@@ -90,13 +90,14 @@ class OAuth2AuthenticationGate extends ApplicationComponent implements Authentic
 		}
 
 		$userManager = $this->getUserManager();
-		$user = $userManager->loadModel([$this->userLoginField => $accessTokenModel->user_login]);
+		$user = $userManager->loadModel([$this->userAuthField => $accessTokenModel->user_login]);
 		if (!$user) {
 			$this->authProblem = self::AUTH_PROBLEM_USER_NOT_FOUND;
 			return;
 		}
 
 		$this->app->user->setData($user);
+		$this->app->user->setAuthFieldName($this->userAuthField);
 	}
 
 	/**
@@ -171,7 +172,7 @@ class OAuth2AuthenticationGate extends ApplicationComponent implements Authentic
 	public function findUserByPassword($login, $password) {
 		$manager = $this->getUserManager();
 
-		$fields = (array)$this->userAuthenticateFields;
+		$fields = (array)$this->userAuthFields;
 		foreach ($fields as $field) {
 			$user = $manager->loadModel([
 				$field => $login,
@@ -192,7 +193,7 @@ class OAuth2AuthenticationGate extends ApplicationComponent implements Authentic
 	public function registerUser($login, $password) {
 		$userManager = $this->getUserManager();
 
-		$user = $userManager->loadModel([$this->userLoginField => $login]);
+		$user = $userManager->loadModel([$this->userAuthField => $login]);
 		if ($user) {
 			$this->app->dialog->useMessages();
 			$this->app->dialog->addMessage("Login \"$login\" already exists");
@@ -200,7 +201,7 @@ class OAuth2AuthenticationGate extends ApplicationComponent implements Authentic
 		}
 
 		$user = $userManager->newModel();
-		$user->{$this->userLoginField} = $login;
+		$user->{$this->userAuthField} = $login;
 		$user->{$this->userPasswordField} = $this->getPasswordHash($password);
 		$user->save();
 		return $user;
@@ -253,7 +254,7 @@ class OAuth2AuthenticationGate extends ApplicationComponent implements Authentic
 		}
 
 		$manager = $this->getUserManager();
-		$user = $manager->loadModel([$this->userLoginField => $refreshTokenModel->user_login]);
+		$user = $manager->loadModel([$this->userAuthField => $refreshTokenModel->user_login]);
 
 		return [
 			$this->updateAccessTokenForUser($user),
@@ -277,14 +278,14 @@ class OAuth2AuthenticationGate extends ApplicationComponent implements Authentic
 		$time = $time->format('Y-m-d H:i:s');
 
 		$manager = $this->getModelManager('RefreshToken');
-		$token = $manager->loadModel(['user_login' => $user->{$this->userLoginField}]);
+		$token = $manager->loadModel(['user_login' => $user->{$this->userAuthField}]);
 		if ($token) {
 			$token->expire = $time;
 			$token->save();
 		}
 
 		$manager = $this->getModelManager('AccessToken');
-		$token = $manager->loadModel(['user_login' => $user->{$this->userLoginField}]);
+		$token = $manager->loadModel(['user_login' => $user->{$this->userAuthField}]);
 		if ($token) {
 			$token->expire = $time;
 			$token->save();
@@ -359,10 +360,10 @@ class OAuth2AuthenticationGate extends ApplicationComponent implements Authentic
 	 *
 	 * */
 	private function updateTokenForUser($user, $manager, $lifetime) {
-		$token = $manager->loadModel(['user_login' => $user->{$this->userLoginField}]);
+		$token = $manager->loadModel(['user_login' => $user->{$this->userAuthField}]);
 		if (!$token) {
 			$token = $manager->newModel();
-			$token->user_login = $user->{$this->userLoginField};
+			$token->user_login = $user->{$this->userAuthField};
 		}
 
 		$token->token = $this->genTokenForUser($user);

@@ -1,0 +1,1 @@
+{"type":"new_table","model":"AuthSourceRight","schema":{"fields":{"source_name":{"type":"string"}},"relations":{"rights":"AuthRight[]"}}}

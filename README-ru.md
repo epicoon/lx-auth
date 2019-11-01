@@ -9,8 +9,8 @@
 
 Подключаем компоненты к приложению (в главном конфиге):
 'userModel' => 'usertest.User', - модель юзера: usertest - название сервиса, User - название самой модели
-'userAuthenticateFields' => 'email', - поле (или поля), по которому (помимо пароля) будет происходить поиск юзеров
-'userLoginField' => 'email', - поле (одно из userAuthenticateFields), с которым будут связаны токены
+'userAuthFields' => 'email', - поле (или поля), по которому (помимо пароля) будет происходить поиск юзеров
+'userAuthField' => 'email', - поле (одно из userAuthFields), с которым будут связаны токены
 
 ```php
 'components' => [
@@ -18,8 +18,8 @@
 	'authenticationGate' => [
 		'class' => lx\auth\OAuth2AuthenticationGate::class,
 		'userModel' => 'usertest.User',
-		'userAuthenticateFields' => 'email',
-		'userLoginField' => 'email',
+		'userAuthFields' => 'email',
+		'userAuthField' => 'email',
 	],
 
 	'authorizationGate' => [
