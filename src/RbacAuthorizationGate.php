@@ -4,7 +4,6 @@ namespace lx\auth;
 
 use lx\ApplicationComponent;
 use lx\AuthorizationInterface;
-use lx\ModelCollection;
 use lx\ResponseSource;
 use lx\User;
 

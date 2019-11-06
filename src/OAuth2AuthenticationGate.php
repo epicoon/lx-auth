@@ -312,7 +312,7 @@ class OAuth2AuthenticationGate extends ApplicationComponent implements Authentic
 	 * Получить менеджер моделей сервиса для текущего класса
 	 *
 	 * @param $modelName string
-	 * @return lx\ModelManager|null
+	 * @return \lx\model\ModelManager|null
 	 * */
 	protected function getModelManager($modelName) {
 		$service = $this->app->getService($this->tokenServiceName);
