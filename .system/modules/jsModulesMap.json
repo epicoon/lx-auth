@@ -1,1 +1,1 @@
-{"lx.auth.LoginForm":{"name":"lx.auth.LoginForm","path":"\/home\/lx\/webprj\/lx.loc\/vendor\/lx\/lx-auth\/src\/LoginForm\/_LoginForm.js","data":{"i18n":"i18n.yaml"}},"lx.auth.LogoutButton":{"name":"lx.auth.LogoutButton","path":"\/home\/lx\/webprj\/lx.loc\/vendor\/lx\/lx-auth\/src\/LogoutButton\/_LogoutButton.js"}}
+{"lx.auth.LoginForm":{"name":"lx.auth.LoginForm","path":"vendor\/lx\/lx-auth\/src\/LoginForm\/_LoginForm.js","data":{"i18n":"i18n.yaml"}},"lx.auth.LogoutButton":{"name":"lx.auth.LogoutButton","path":"vendor\/lx\/lx-auth\/src\/LogoutButton\/_LogoutButton.js"}}
