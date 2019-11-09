@@ -40,8 +40,8 @@ class OAuth2AuthenticationGate extends ApplicationComponent implements Authentic
 	 * 		'name' => 'modelName'
 	 * ]
 	 * */
-	public function __construct($config = []) {
-		parent::__construct($config);
+	public function __construct($app, $config = []) {
+		parent::__construct($app, $config);
 
 		$this->authProblem = self::AUTH_PROBLEM_NO;
 

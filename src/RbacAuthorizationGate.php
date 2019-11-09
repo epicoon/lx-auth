@@ -12,11 +12,6 @@ class RbacAuthorizationGate extends ApplicationComponent implements Authorizatio
 	protected $rbacServiceName = 'lx/lx-auth';
 	protected $rbacManagePluginName = 'lx/lx-auth:authManage';
 
-	public function __construct($config = [])
-	{
-		parent::__construct($config);
-	}
-
 	public function checkAccess($user, $responseSource)
 	{
 		$rights = $this->getRightsForSource($responseSource);
