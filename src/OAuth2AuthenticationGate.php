@@ -11,10 +11,11 @@ use lx\AuthenticationInterface;
  * */
 class OAuth2AuthenticationGate extends ApplicationComponent implements AuthenticationInterface {
 	const AUTH_PROBLEM_NO = 0;
-	const AUTH_PROBLEM_TOKEN_NOT_RETRIEVED = 5;
-	const AUTH_PROBLEM_TOKEN_NOT_FOUND = 10;
-	const AUTH_PROBLEM_TOKEN_EXPIRED = 15;
-	const AUTH_PROBLEM_USER_NOT_FOUND = 20;
+	const AUTH_PROBLEM_USER_COMPONENT_IS_UNAVAILABLE = 5;
+	const AUTH_PROBLEM_TOKEN_NOT_RETRIEVED = 10;
+	const AUTH_PROBLEM_TOKEN_NOT_FOUND = 15;
+	const AUTH_PROBLEM_TOKEN_EXPIRED = 20;
+	const AUTH_PROBLEM_USER_NOT_FOUND = 25;
 
 	protected $userAuthFields = 'login';
 	protected $userAuthField = 'login';
@@ -68,6 +69,11 @@ class OAuth2AuthenticationGate extends ApplicationComponent implements Authentic
 	 * - Если модель пользователя не найдена - компонент "пользователь" остается гостем
 	 * */
 	public function authenticateUser() {
+		if ( ! $this->app->user->isAvailable()) {
+			$this->authProblem = self::AUTH_PROBLEM_USER_COMPONENT_IS_UNAVAILABLE;
+			return;
+		}
+
 		$accessToken = $this->retrieveToken();
 		if (!$accessToken) {
 			$this->authProblem = self::AUTH_PROBLEM_TOKEN_NOT_RETRIEVED;
@@ -96,7 +102,7 @@ class OAuth2AuthenticationGate extends ApplicationComponent implements Authentic
 			return;
 		}
 
-		$this->app->user->setData($user);
+		$this->app->user->set($user);
 		$this->app->user->setAuthFieldName($this->userAuthField);
 	}
 
@@ -132,6 +138,9 @@ class OAuth2AuthenticationGate extends ApplicationComponent implements Authentic
 			case self::AUTH_PROBLEM_NO:
 				// Проблем при аутентификации не было, но раз наложены ограничения при авторизации - доступа нет
 				return false;
+			case self::AUTH_PROBLEM_USER_COMPONENT_IS_UNAVAILABLE:
+				// Компонент приложения "пользователь" не сконфигурирован
+				return false;
 			case self::AUTH_PROBLEM_TOKEN_NOT_FOUND:
 				// Токен мы получили, но в своей системе не нашли - подозрительная ситуация
 				return false;
@@ -141,17 +150,6 @@ class OAuth2AuthenticationGate extends ApplicationComponent implements Authentic
 		}
 
 		return $responseSource;
-	}
-
-	/**
-	 * Js-расширение для клиента
-	 * */
-	public function getJs() {
-		return "lx.__auth = function(request){
-			let token = lx.Storage.get('lxauthtoken');
-			if (!token) return;
-			request.setRequestHeader('Authorization', token);
-		};";
 	}
 
 
