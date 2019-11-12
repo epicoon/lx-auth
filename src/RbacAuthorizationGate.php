@@ -117,9 +117,22 @@ class RbacAuthorizationGate extends ApplicationComponent implements Authorizatio
 	private function getDefaultRoles()
 	{
 		$defaultListManager = $this->getModelManager('AuthDefaultList');
-		$models = $defaultListManager->loadModels(['type' => 'role']);
-		if ( ! $models) {
-			return [];
+		$models = $defaultListManager->loadModels(['type' => 'unauthorized-role']);
+		if ($models->isEmpty()) {
+			return $models;
+		}
+
+		$roleManager = $this->getModelManager('AuthRole');
+		$roles = $roleManager->loadModels($models->getField('id_item'));
+		return $roles;
+	}
+
+	private function getNewClientRoles()
+	{
+		$defaultListManager = $this->getModelManager('AuthDefaultList');
+		$models = $defaultListManager->loadModels(['type' => 'new-client-role']);
+		if ($models->isEmpty()) {
+			return $models;
 		}
 
 		$roleManager = $this->getModelManager('AuthRole');
