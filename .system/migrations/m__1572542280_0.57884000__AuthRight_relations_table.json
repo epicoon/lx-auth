@@ -1,1 +1,0 @@
-{"type":"relations_table","model":"AuthRight","actions":[{"action":"add_relation","name":"roles","type":"many-to-many","value":"AuthRole"},{"action":"add_relation","name":"sourceRights","type":"many-to-many","value":"AuthSourceRight"}]}

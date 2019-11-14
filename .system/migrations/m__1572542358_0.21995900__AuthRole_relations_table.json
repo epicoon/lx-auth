@@ -1,1 +1,0 @@
-{"type":"relations_table","model":"AuthRole","actions":[{"action":"add_relation","name":"userRoles","type":"many-to-many","value":"AuthUserRole"}]}
