@@ -3,4 +3,4 @@ AuthUserRole:
     user_auth_data: {type: string}
 
   relations:
-    roles: AuthRole[]
+    roles: '><AuthRole'

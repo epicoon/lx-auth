@@ -3,5 +3,5 @@ AuthRole:
     name: {type: string}
 
   relations:
-    rights: AuthRight[]
-    userRoles: AuthUserRole[]
+    rights: '><AuthRight'
+    userRoles: '><AuthUserRole'

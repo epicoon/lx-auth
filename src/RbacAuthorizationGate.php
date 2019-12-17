@@ -60,7 +60,7 @@ class RbacAuthorizationGate extends ApplicationComponent implements Authorizatio
 			return $this->getDefaultResourceRights();
 		}
 
-		return $sourceRightModel->rights->getField('name');
+		return $sourceRightModel->rights->get()->getField('name');
 	}
 
 	private function getDefaultResourceRights()
@@ -85,7 +85,7 @@ class RbacAuthorizationGate extends ApplicationComponent implements Authorizatio
 		$rights = $roles->getField('rights');
 		$result = [];
 		foreach ($rights as $rightList) {
-			foreach ($rightList as $right) {
+			foreach ($rightList->get() as $right) {
 				$rightName = $right->name;
 				if (array_search($rightName, $result) === false) {
 					$result[] = $rightName;
@@ -111,7 +111,7 @@ class RbacAuthorizationGate extends ApplicationComponent implements Authorizatio
 			return $defaultRoles;
 		}
 
-		return $defaultRoles->merge($userRoleModel->roles);
+		return $defaultRoles->merge($userRoleModel->roles->get());
 	}
 
 	private function getDefaultRoles()
