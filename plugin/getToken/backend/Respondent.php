@@ -2,8 +2,32 @@
 
 namespace lx\auth\plugin\getToken\backend;
 
-class Respondent extends \lx\Respondent {
-	public function refreshTokens($refreshToken) {
+class Respondent extends \lx\Respondent
+{
+	public function tryAuthenticate()
+	{
+		$gate = $this->app->authenticationGate;
+		
+		$result = $gate->authenticateUser();
+		if ($result) {
+			return ['success' => true];
+		}
+
+		if ($gate->tokenIsExpired()) {
+			return [
+				'success' => false,
+				'message' => 'expired',
+			];
+		}
+
+		return [
+			'success' => false,
+			'message' => 'unknown',
+		];
+	}
+	
+	public function refreshTokens($refreshToken)
+	{
 		$gate = $this->app->authenticationGate;
 
 		$pare = $gate->refreshTokens($refreshToken);

@@ -21,7 +21,7 @@ class LoginForm extends Rect {
 		$user = $gate->findUserByPassword($login, $password);
 		if (!$user) {
 			return [
-				'result' => false,
+				'success' => false,
 				'message' => 'User not found',
 			];
 		}
@@ -29,7 +29,7 @@ class LoginForm extends Rect {
 		$accessTokenModel = $gate->updateAccessTokenForUser($user);
 		$refreshTokenModel = $gate->updateRefreshTokenForUser($user);
 		return [
-			'result' => true,
+			'success' => true,
 			'token' => 'Bearer ' . $accessTokenModel->token,
 			'refreshToken' => 'Bearer ' . $refreshTokenModel->token,
 		];
@@ -41,14 +41,15 @@ class LoginForm extends Rect {
 		$user = $gate->registerUser($login, $password);
 		if (!$user) {
 			return [
-				'result' => false,
+				'success' => false,
+				'message' => "Login \"$login\" already exists",
 			];
 		}
 
 		$accessTokenModel = $gate->updateAccessTokenForUser($user);
 		$refreshTokenModel = $gate->updateRefreshTokenForUser($user);
 		return [
-			'result' => true,
+			'success' => true,
 			'token' => 'Bearer ' . $accessTokenModel->token,
 			'refreshToken' => 'Bearer ' . $refreshTokenModel->token,
 		];

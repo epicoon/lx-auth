@@ -45,30 +45,30 @@ class LoginForm extends lx.Box #lx:namespace lx.auth {
 
 		this->send.click(()=>{
 			^self::login(this->login.value(), this->password.value()):(res)=>{
-				if (res.result === false) {
+				if (res.success === false) {
 					lx.Tost.warning(res.message);
 					return;
 				}
 
-				saveTokens(res.token, res.refreshToken);
+				__saveTokens(res.token, res.refreshToken);
 			};
 		});
 
 		this->register.click(()=>{
 			^self::register(this->login.value(), this->password.value()):(res)=>{
-				if (res.result === false) {
+				if (res.success === false) {
 					lx.Tost.warning(res.message);
 					return;
 				}
 
-				saveTokens(res.token, res.refreshToken);
+				__saveTokens(res.token, res.refreshToken);
 			};
 		});
 	}
 }
 
 #lx:client {
-	function saveTokens(token, refreshToken) {
+	function __saveTokens(token, refreshToken) {
 		lx.Storage.set('lxauthtoken', token);
 		lx.Storage.set('lxauthretoken', refreshToken);
 

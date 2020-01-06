@@ -71,39 +71,44 @@ class OAuth2AuthenticationGate extends ApplicationComponent implements Authentic
 	public function authenticateUser() {
 		if ( ! $this->app->user->isAvailable()) {
 			$this->authProblem = self::AUTH_PROBLEM_USER_COMPONENT_IS_UNAVAILABLE;
-			return;
+			return false;
 		}
 
 		$accessToken = $this->retrieveToken();
 		if (!$accessToken) {
 			$this->authProblem = self::AUTH_PROBLEM_TOKEN_NOT_RETRIEVED;
-			return;
+			return false;
 		}
 
 		$accessTokenManager = $this->getModelManager('AccessToken');
 		$accessTokenModel = $accessTokenManager->loadModel(['token' => $accessToken]);
 		if (!$accessTokenModel) {
 			$this->authProblem = self::AUTH_PROBLEM_TOKEN_NOT_FOUND;
-			return;
+			return false;
 		}
 
 		$now = (new \DateTime())->format('Y-m-d H:i:s');
 		$expire = (new \DateTime($accessTokenModel->expire))->format('Y-m-d H:i:s');
 		if ($expire <= $now) {
-			$this->app->dialog->addMessage('expired');
 			$this->authProblem = self::AUTH_PROBLEM_TOKEN_EXPIRED;
-			return;
+			return false;
 		}
 
 		$userManager = $this->getUserManager();
 		$user = $userManager->loadModel([$this->userAuthField => $accessTokenModel->user_login]);
 		if (!$user) {
 			$this->authProblem = self::AUTH_PROBLEM_USER_NOT_FOUND;
-			return;
+			return false;
 		}
 
 		$this->app->user->set($user);
 		$this->app->user->setAuthFieldName($this->userAuthField);
+		return true;
+	}
+	
+	public function tokenIsExpired()
+	{
+		return $this->authProblem = self::AUTH_PROBLEM_TOKEN_EXPIRED;
 	}
 
 	/**
@@ -193,8 +198,6 @@ class OAuth2AuthenticationGate extends ApplicationComponent implements Authentic
 
 		$user = $userManager->loadModel([$this->userAuthField => $login]);
 		if ($user) {
-			$this->app->dialog->useMessages();
-			$this->app->dialog->addMessage("Login \"$login\" already exists");
 			return false;
 		}
 
@@ -247,7 +250,7 @@ class OAuth2AuthenticationGate extends ApplicationComponent implements Authentic
 		$now = (new \DateTime())->format('Y-m-d H:i:s');
 		$expire = (new \DateTime($refreshTokenModel->expire))->format('Y-m-d H:i:s');
 		if ($expire <= $now) {
-			$this->app->dialog->addMessage('expired');
+			$this->authProblem = self::AUTH_PROBLEM_TOKEN_EXPIRED;
 			return false;
 		}
 
