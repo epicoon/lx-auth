@@ -5,7 +5,7 @@
 		{
 			"action":"create_relations",
 			"rel":"rights",
-			"rel_type":3,
+			"rel_data":"><AuthRight",
 			"pk":1,
 			"rel_model":"AuthRight",
 			"rel_rel":"roles",
@@ -14,7 +14,7 @@
 		{
 			"action":"create_relations",
 			"rel":"rights",
-			"rel_type":3,
+			"rel_data":"><AuthRight",
 			"pk":2,
 			"rel_model":"AuthRight",
 			"rel_rel":"roles",
@@ -23,7 +23,7 @@
 		{
 			"action":"create_relations",
 			"rel":"rights",
-			"rel_type":3,
+			"rel_data":"><AuthRight",
 			"pk":3,
 			"rel_model":"AuthRight",
 			"rel_rel":"roles",
@@ -32,7 +32,7 @@
 		{
 			"action":"create_relations",
 			"rel":"rights",
-			"rel_type":3,
+			"rel_data":"><AuthRight",
 			"pk":4,
 			"rel_model":"AuthRight",
 			"rel_rel":"roles",

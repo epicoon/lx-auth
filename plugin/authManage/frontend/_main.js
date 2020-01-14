@@ -10,48 +10,6 @@
 
 
 
-// ^Respondent.loadUsers():(res)=>{
-// 	console.log(res);
-// };
-
-// ^Respondent.loadUserRoles():(res)=>{
-// 	console.log(res);
-// };
-
-^Respondent.loadRoles():(res)=>{
-
-	/*
-
-
-
-	{
-		"rights": [],
-		"roles": []
-	}
-
-
-
-	{
-		"success": "ok",
-		"code": 200,
-		"result": {
-			"rights": [],
-			"roles": []
-		}
-	}
-
-
-	*/
-
-
-
-
-	console.log(res);
-
-
-};
-
-
 
 class Test1 extends lx.BindableModel {
 	#lx:schema
