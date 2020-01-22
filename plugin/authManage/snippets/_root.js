@@ -50,11 +50,15 @@ body.begin();
 		}
 	});
 
-	var boxResources = mbox.sheet(1).add(lx.Box, {geom:['10px', '10px', null, null, '10px', '10px']});
+	// var boxResources = mbox.sheet(1).add(lx.Box, {geom:['10px', '10px', null, null, '10px', '10px']});
 
 
 
-	var boxUsers = mbox.sheet(2).add(lx.Box, {geom:['10px', '10px', null, null, '10px', '10px']});
+
+
+
+
+	var boxUsers = mbox.sheet(1).add(lx.Box, {geom:['10px', '10px', null, null, '10px', '10px']});
 	boxUsers.setPlugin({
 		name: 'lx/lx-model:relationManager',
 		clientParams: {
