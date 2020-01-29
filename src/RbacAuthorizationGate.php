@@ -4,13 +4,31 @@ namespace lx\auth;
 
 use lx\ApplicationComponent;
 use lx\AuthorizationInterface;
+use lx\EventListenerTrait;
 use lx\ResponseSource;
 use lx\User;
+use lx\UserEventsEnum;
 
 class RbacAuthorizationGate extends ApplicationComponent implements AuthorizationInterface
 {
+	use EventListenerTrait;
+
 	protected $rbacServiceName = 'lx/lx-auth';
 	protected $rbacManagePluginName = 'lx/lx-auth:authManage';
+
+	public function __construct($owner, $config = [])
+	{
+		parent::__construct($owner, $config);
+		$this->constructEventListener($owner->events);
+	}
+
+	public static function getEventHandlersMap()
+	{
+		return [
+			UserEventsEnum::NEW_USER => 'onNewUser',
+			UserEventsEnum::BEFORE_USER_DELETE => 'onUserDelete',
+		];
+	}
 
 	public function checkAccess($user, $responseSource)
 	{
@@ -57,22 +75,10 @@ class RbacAuthorizationGate extends ApplicationComponent implements Authorizatio
 		]);
 
 		if ( ! $sourceRightModel) {
-			return $this->getDefaultResourceRights();
-		}
-
-		return $sourceRightModel->rights->get()->getField('name');
-	}
-
-	private function getDefaultResourceRights()
-	{
-		$defaultListManager = $this->getModelManager('AuthDefaultList');
-		$defaultRightsData = $defaultListManager->loadModels(['type' => 'right']);
-		if ($defaultRightsData->isEmpty()) {
 			return [];
 		}
 
-		$rightManager = $this->getModelManager('AuthRight');
-		return $rightManager->loadModels($defaultRightsData->getField('id_item'))->getField('name');
+		return $sourceRightModel->rights->get()->getField('name');
 	}
 
 	/**
@@ -81,9 +87,13 @@ class RbacAuthorizationGate extends ApplicationComponent implements Authorizatio
 	 */
 	private function getUserRights($user)
 	{
-		$roles = $this->getUserRoles($user);
-		$rights = $roles->getField('rights');
 		$result = [];
+		$roles = $this->getUserRoles($user);
+		if ( ! $roles) {
+			return $result;
+		}
+
+		$rights = $roles->getField('rights');
 		foreach ($rights as $rightList) {
 			foreach ($rightList->get() as $right) {
 				$rightName = $right->name;
@@ -98,26 +108,25 @@ class RbacAuthorizationGate extends ApplicationComponent implements Authorizatio
 
 	private function getUserRoles($user)
 	{
-		$defaultRoles = $this->getDefaultRoles();
 		if ($user->isGuest()) {
-			return $defaultRoles;
+			return null;
 		}
 
 		$userRoleManager = $this->getModelManager('AuthUserRole');
 		$userRoleModel = $userRoleManager->loadModel([
-			'user_auth_data' => $user->{$user->getAuthFieldName()}
+			'user_auth_data' => $user->getAuthField()
 		]);
 		if ( ! $userRoleModel) {
-			return $defaultRoles;
+			return null;
 		}
 
-		return $defaultRoles->merge($userRoleModel->roles->get());
+		return $userRoleModel->roles->get();
 	}
 
-	private function getDefaultRoles()
+	private function getNewUserRoles()
 	{
 		$defaultListManager = $this->getModelManager('AuthDefaultList');
-		$models = $defaultListManager->loadModels(['type' => 'unauthorized-role']);
+		$models = $defaultListManager->loadModels(['type' => 'new-user-role']);
 		if ($models->isEmpty()) {
 			return $models;
 		}
@@ -127,16 +136,31 @@ class RbacAuthorizationGate extends ApplicationComponent implements Authorizatio
 		return $roles;
 	}
 
-	private function getNewClientRoles()
-	{
-		$defaultListManager = $this->getModelManager('AuthDefaultList');
-		$models = $defaultListManager->loadModels(['type' => 'new-client-role']);
-		if ($models->isEmpty()) {
-			return $models;
-		}
 
-		$roleManager = $this->getModelManager('AuthRole');
-		$roles = $roleManager->loadModels($models->getField('id_item'));
-		return $roles;
+	/*******************************************************************************************************************
+	 * EVENT HANDLERS
+	 ******************************************************************************************************************/
+
+	private function onNewUser($user)
+	{
+		$userRoleManager = $this->getModelManager('AuthUserRole');
+		$userRole = $userRoleManager->newModel();
+		$userRole->user_auth_data = $user->getAuthField();
+		$userRole->save();
+
+		$roles = $this->getNewUserRoles();
+		$userRole->roles->add($roles);
+	}
+
+	private function onUserDelete($user)
+	{
+		$userRoleManager = $this->getModelManager('AuthUserRole');
+		$userRole = $userRoleManager->loadModel([
+			'user_auth_data' => $user->getAuthField()
+		]);
+		if ($userRole) {
+			$userRole->removeAllRelations();
+			$userRole->delete();
+		}
 	}
 }

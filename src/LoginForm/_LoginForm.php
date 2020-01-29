@@ -16,16 +16,17 @@ class LoginForm extends Rect {
 	}
 
 	public function login($login, $password) {
-		$gate = $this->app->authenticationGate;
+		$processor = $this->app->userProcessor;
 
-		$user = $gate->findUserByPassword($login, $password);
-		if (!$user) {
+		$user = $processor->findUserByPassword($login, $password);
+		if ( ! $user) {
 			return [
 				'success' => false,
 				'message' => 'User not found',
 			];
 		}
-		
+
+		$gate = $this->app->authenticationGate;
 		$accessTokenModel = $gate->updateAccessTokenForUser($user);
 		$refreshTokenModel = $gate->updateRefreshTokenForUser($user);
 		return [
@@ -36,16 +37,23 @@ class LoginForm extends Rect {
 	}
 
 	public function register($login, $password) {
-		$gate = $this->app->authenticationGate;
+		$processor = $this->app->userProcessor;
+		if ( ! $processor) {
+			return [
+				'success' => false,
+				'message' => 'User processor does not exist',
+			];
+		}
 
-		$user = $gate->registerUser($login, $password);
-		if (!$user) {
+		$user = $processor->createUser($login, $password);
+		if ( ! $user) {
 			return [
 				'success' => false,
 				'message' => "Login \"$login\" already exists",
 			];
 		}
 
+		$gate = $this->app->authenticationGate;
 		$accessTokenModel = $gate->updateAccessTokenForUser($user);
 		$refreshTokenModel = $gate->updateRefreshTokenForUser($user);
 		return [

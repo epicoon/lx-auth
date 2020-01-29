@@ -6,4 +6,4 @@ jsMain: frontend/_main.js
 jsBootstrap: frontend/_bootstrap.js
 
 respondents:
-  Respondent: backend\Respondent
+  UserRole: backend\UserRoleRespondent

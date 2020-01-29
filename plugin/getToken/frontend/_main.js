@@ -12,7 +12,9 @@ function trySendToken() {
 }
 
 function tryAuth(res) {
-	if (res.success === false) {
+	if (res.success === true) {
+		(new lx.Request(document.location.pathname)).send().then((res)=>lx.body.injectPlugin(res));
+	} else if (res.success === false) {
 		if (res.message == 'expired') {
 			let refreshToken = lx.Storage.get('lxauthretoken');
 			if (!refreshToken) {
@@ -20,7 +22,7 @@ function tryAuth(res) {
 				return;
 			}
 
-		^Respondent.refreshTokens(refreshToken):(res)=>{
+			^Respondent.refreshTokens(refreshToken):(res)=>{
 				if (!res.token || !res.refreshToken) {
 					lx.createObject(Plugin.clientParams.loginForm);
 					return;
@@ -35,6 +37,4 @@ function tryAuth(res) {
 		}
 		return;
 	}
-
-	lx.body.injectPlugin(res);
 }

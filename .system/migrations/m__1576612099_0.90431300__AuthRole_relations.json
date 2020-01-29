@@ -28,15 +28,6 @@
 			"rel_model":"AuthRight",
 			"rel_rel":"roles",
 			"rel_pks":[5,6]
-		},
-		{
-			"action":"create_relations",
-			"rel":"rights",
-			"rel_data":"><AuthRight",
-			"pk":4,
-			"rel_model":"AuthRight",
-			"rel_rel":"roles",
-			"rel_pks":[7,8]
 		}
 	]
 }
