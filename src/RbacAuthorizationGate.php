@@ -4,6 +4,7 @@ namespace lx\auth;
 
 use lx\ApplicationComponent;
 use lx\AuthorizationInterface;
+use lx\EventLestenerInterface;
 use lx\EventListenerTrait;
 use lx\ResponseSource;
 use lx\User;

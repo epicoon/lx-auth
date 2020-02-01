@@ -1,7 +1,7 @@
 const userRoleEventHandlers = {
 	start: (core, condition0 = '', condition1 = '', page0 = 0, page1 = 0)=>{
 		var plugin = core.plugin.parent;
-		plugin.callToRespondent('UserRole/getBaseInfo', [
+		plugin.ajax('UserRole.getBaseInfo', [
 			plugin.clientParams.userModel,
 			condition0,
 			condition1,
@@ -9,7 +9,7 @@ const userRoleEventHandlers = {
 				{page: page0, count: core.modelData0.perPage},
 				{page: page1, count: core.modelData1.perPage}
 			]
-		], (res)=>{
+		]).send().then((res)=>{
 			core.modelData0.list = lx.ModelCollection.create(res.users);
 			core.modelData1.list = lx.ModelCollection.create(res.roles);
 			core.relations = res.relations;
@@ -25,34 +25,30 @@ const userRoleEventHandlers = {
 
 	createRelation: function(core, modelName0, pk0, modelName1, pk1) {
 		var plugin = core.plugin.parent;
-		plugin.callToRespondent('UserRole/createRelation', [
+		plugin.ajax('UserRole.createRelation', [
 			modelName0, pk0, modelName1, pk1
-		], (res)=>{
+		]).send().then((res)=>{
 			core.onCreateRelation(modelName0, pk0, modelName1, pk1);
 		});
 	},
 
 	deleteRelation: function(core, modelName0, pk0, modelName1, pk1) {
 		var plugin = core.plugin.parent;
-		plugin.callToRespondent('UserRole/deleteRelation', [
+		plugin.ajax('UserRole.deleteRelation', [
 			modelName0, pk0, modelName1, pk1
-		], (res)=>{
+		]).send().then((res)=>{
 			core.onCreateRelation(modelName0, pk0, modelName1, pk1);
 		});
 	},
 
 	createModel: function(core, modelData, fields, callback) {
 		var plugin = core.plugin.parent;
-		plugin.callToRespondent('UserRole/createModel', [modelData.fullname, fields], (res)=>{
-			callback();
-		});
+		plugin.ajax('UserRole.createModel', [modelData.fullname, fields]).send().then(callback);
 	},
 
 	deleteModel: function(core, modelData, index, callback) {
 		var plugin = core.plugin.parent;
 		var pk = modelData.list.at(index).getPk();
-		plugin.callToRespondent('UserRole/deleteModel', [modelData.fullname, pk], (res)=>{
-			callback();
-		});
+		plugin.ajax('UserRole.deleteModel', [modelData.fullname, pk]).send().then(callback);
 	}
 };
