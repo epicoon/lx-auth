@@ -2,21 +2,27 @@
 
 namespace lx\auth;
 
-use lx\ApplicationComponent;
+use lx\ApplicationToolTrait;
+use lx\FusionComponentInterface;
+use lx\FusionComponentTrait;
 use lx\model\Model;
+use lx\Object;
 use lx\UserEventsEnum;
 use lx\UserProcessorInterface;
 
-class UserProcessor extends ApplicationComponent implements UserProcessorInterface
+class UserProcessor extends Object implements UserProcessorInterface, FusionComponentInterface
 {
+	use ApplicationToolTrait;
+	use FusionComponentTrait;
+
 	protected $serviceName = 'lx/lx-auth';
 	protected $userAuthFields = 'login';
 	protected $userAuthField = 'login';
 	protected $userPasswordField = 'password';
 	private $userModelName;
 
-	public function __construct($app, $config = []) {
-		parent::__construct($app, $config);
+	public function __construct($config = []) {
+		parent::__construct($config);
 
 		$userModel = $config['userModel'];
 		if (is_string($userModel)) {

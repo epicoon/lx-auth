@@ -2,17 +2,22 @@
 
 namespace lx\auth;
 
-use lx\ApplicationComponent;
+use lx\ApplicationToolTrait;
 use lx\ClassOfServiceInterface;
 use lx\AuthenticationInterface;
 use lx\EventListenerTrait;
+use lx\FusionComponentInterface;
+use lx\FusionComponentTrait;
+use lx\Object;
 use lx\UserEventsEnum;
 
 /**
  * Class OAuth2AuthenticationGate
  * @package lx\auth
  */
-class OAuth2AuthenticationGate extends ApplicationComponent implements AuthenticationInterface {
+class OAuth2AuthenticationGate extends Object implements AuthenticationInterface, FusionComponentInterface {
+	use ApplicationToolTrait;
+	use FusionComponentTrait;
 	use EventListenerTrait;
 
 	const AUTH_PROBLEM_NO = 0;
@@ -42,11 +47,10 @@ class OAuth2AuthenticationGate extends ApplicationComponent implements Authentic
 	 * 		'name' => 'modelName'
 	 * ]
 	 * */
-	public function __construct($app, $config = []) {
-		parent::__construct($app, $config);
+	public function __construct($config = []) {
+		parent::__construct($config);
 
 		$this->authProblem = self::AUTH_PROBLEM_NO;
-		$this->constructEventListener($app->events);
 	}
 
 	public static function getEventHandlersMap()
@@ -118,7 +122,7 @@ class OAuth2AuthenticationGate extends ApplicationComponent implements Authentic
 			// Группа проблем, где можно инициировать аутентификацию
 			case self::AUTH_PROBLEM_TOKEN_NOT_RETRIEVED:
 			case self::AUTH_PROBLEM_TOKEN_EXPIRED:
-				// Послать модуль, который поищет токен доступа
+				// Послать плагин, который поищет токен доступа
 				$arr = explode(':', $this->checkTokenPlugin);
 				$service  = $arr[0];
 				$plugin = $arr[1];

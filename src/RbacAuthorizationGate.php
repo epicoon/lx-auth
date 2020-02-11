@@ -2,26 +2,25 @@
 
 namespace lx\auth;
 
-use lx\ApplicationComponent;
+use lx\ApplicationToolTrait;
 use lx\AuthorizationInterface;
 use lx\EventLestenerInterface;
 use lx\EventListenerTrait;
+use lx\FusionComponentInterface;
+use lx\FusionComponentTrait;
+use lx\Object;
 use lx\ResponseSource;
 use lx\User;
 use lx\UserEventsEnum;
 
-class RbacAuthorizationGate extends ApplicationComponent implements AuthorizationInterface
+class RbacAuthorizationGate extends Object implements AuthorizationInterface, FusionComponentInterface
 {
+	use ApplicationToolTrait;
+	use FusionComponentTrait;
 	use EventListenerTrait;
 
 	protected $rbacServiceName = 'lx/lx-auth';
 	protected $rbacManagePluginName = 'lx/lx-auth:authManage';
-
-	public function __construct($owner, $config = [])
-	{
-		parent::__construct($owner, $config);
-		$this->constructEventListener($owner->events);
-	}
 
 	public static function getEventHandlersMap()
 	{
