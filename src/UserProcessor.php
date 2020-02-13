@@ -182,7 +182,7 @@ class UserProcessor extends Object implements UserProcessorInterface, FusionComp
 		}
 
 		$class = get_class($this->app->user);
-		$user = new $class($this->app);
+		$user = new $class();
 		$user->set($userData);
 		$user->setAuthFieldName($this->userAuthField);
 		return $user;

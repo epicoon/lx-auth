@@ -8,13 +8,6 @@ use lx\Rect;
  * Форма логина
  * */
 class LoginForm extends Rect {
-	protected static function ajaxMethods() {
-		return [
-			'login',
-			'register',
-		];
-	}
-
 	public function login($login, $password) {
 		$processor = $this->app->userProcessor;
 

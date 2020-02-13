@@ -9,7 +9,7 @@ use lx\EventListenerTrait;
 use lx\FusionComponentInterface;
 use lx\FusionComponentTrait;
 use lx\Object;
-use lx\ResponseSource;
+use lx\SourceContext;
 use lx\User;
 use lx\UserEventsEnum;
 
@@ -33,15 +33,24 @@ class RbacAuthorizationGate extends Object implements AuthorizationInterface, Fu
 	public function checkAccess($user, $responseSource)
 	{
 		$rights = $this->getRightsForSource($responseSource);
-		$userRights = $this->getUserRights($user);
-		foreach ($rights as $right) {
-			if ( ! in_array($right, $userRights)) {
-				$responseSource->addRestriction(ResponseSource::RESTRICTION_INSUFFICIENT_RIGHTS);
-				break;
-			}
+		$ok = $this->checkUserHasRights($user, $rights);
+		if ( ! $ok) {
+			$responseSource->addRestriction(SourceContext::RESTRICTION_INSUFFICIENT_RIGHTS);
 		}
 
 		return $responseSource;
+	}
+
+	public function checkUserHasRights($user, $rights)
+	{
+		$userRights = $this->getUserRights($user);
+		foreach ($rights as $right) {
+			if ( ! in_array($right, $userRights)) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	public function getService()
@@ -64,14 +73,14 @@ class RbacAuthorizationGate extends Object implements AuthorizationInterface, Fu
 	}
 
 	/**
-	 * @param $responseSource ResponseSource
+	 * @param SourceContext $source
 	 * @return array
 	 */
-	private function getRightsForSource($responseSource)
+	private function getRightsForSource($source)
 	{
 		$sourceRightManager = $this->getModelManager('AuthSourceRight');
 		$sourceRightModel = $sourceRightManager->loadModel([
-			'source_name' => $responseSource->getSourceName()
+			'source_name' => $source->getSourceName()
 		]);
 
 		if ( ! $sourceRightModel) {
