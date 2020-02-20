@@ -13,7 +13,14 @@ function trySendToken() {
 
 function tryAuth(res) {
 	if (res.success === true) {
-		(new lx.Request(document.location.pathname)).send().then((res)=>lx.body.injectPlugin(res));
+		(new lx.Request(document.location.pathname)).send().then((res)=>{
+			if (res.success === false) {
+				//TODO пока не знаю что и как сюда удобно будет впилить
+				console.log(res);
+			} else {
+				lx.body.injectPlugin(res)
+			}
+		});
 	} else if (res.success === false) {
 		if (res.message == 'expired') {
 			let refreshToken = lx.Storage.get('lxauthretoken');

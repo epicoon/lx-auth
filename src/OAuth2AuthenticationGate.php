@@ -9,6 +9,7 @@ use lx\EventListenerTrait;
 use lx\FusionComponentInterface;
 use lx\FusionComponentTrait;
 use lx\Object;
+use lx\SourceContext;
 use lx\UserEventsEnum;
 
 /**
@@ -117,7 +118,7 @@ class OAuth2AuthenticationGate extends Object implements AuthenticationInterface
 	/**
 	 * Сформировать ответ, пытающийся авторизовать пользователя
 	 * */
-	public function responseToAuthenticate($responseSource) {
+	public function responseToAuthenticate() {
 		switch ($this->authProblem) {
 			// Группа проблем, где можно инициировать аутентификацию
 			case self::AUTH_PROBLEM_TOKEN_NOT_RETRIEVED:
@@ -129,6 +130,7 @@ class OAuth2AuthenticationGate extends Object implements AuthenticationInterface
 				$data = [
 					'service' => $service,
 					'plugin' => $plugin,
+					'method' => 'build',
 				];
 				if ($this->loginForm) {
 					$data['clientParams'] = [
@@ -139,8 +141,7 @@ class OAuth2AuthenticationGate extends Object implements AuthenticationInterface
 					];
 				}
 
-				$responseSource->setData($data);
-				break;
+				return new SourceContext($data);
 
 			// Группа проблем, не разрешающихся аутентификацией
 			case self::AUTH_PROBLEM_NO:
@@ -157,7 +158,7 @@ class OAuth2AuthenticationGate extends Object implements AuthenticationInterface
 				return false;
 		}
 
-		return $responseSource;
+		return false;
 	}
 
 

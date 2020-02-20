@@ -16,6 +16,10 @@ class SourceVoter extends Object implements SourceVoterInterface
 
 	protected function actionRightsMap()
 	{
+		if (method_exists($this->owner, 'actionRightsMap')) {
+			return $this->owner->actionRightsMap();
+		}
+		
 		return [];
 	}
 

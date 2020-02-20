@@ -1,6 +1,0 @@
-AuthSourceRight:
-  fields:
-    source_name: {type: string}
-
-  relations:
-    rights: '><AuthRight'

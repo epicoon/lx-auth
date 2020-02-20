@@ -4,4 +4,3 @@ AuthRight:
 
   relations:
     roles: '><AuthRole'
-    sourceRights: '><AuthSourceRight'

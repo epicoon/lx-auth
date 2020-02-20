@@ -1,1 +1,1 @@
-{"type":"relations","model":"AuthRight","actions":[{"action":"add_relation","name":"roles","type":3,"rel_model":"AuthRole"},{"action":"add_relation","name":"sourceRights","type":3,"rel_model":"AuthSourceRight"}]}
+{"type":"relations","model":"AuthRight","actions":[{"action":"add_relation","name":"roles","type":3,"rel_model":"AuthRole"}]}

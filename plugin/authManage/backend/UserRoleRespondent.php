@@ -25,9 +25,12 @@ class UserRoleRespondent extends Respondent
 		$userRoleList = new ModelCollection();
 		$authFieldName = $this->app->userProcessor->getAuthFieldName();
 		foreach ($users as $user) {
-			$userRoleList[] = $userRoleManager->loadModel([
+			$userRole = $userRoleManager->loadModel([
 				'user_auth_data' => $user->{$authFieldName},
 			]);
+			if ($userRole) {
+				$userRoleList[] = $userRole;
+			}
 		}
 
 		$usersMap = $users->mapByField($authFieldName);
@@ -77,6 +80,11 @@ class UserRoleRespondent extends Respondent
 		$userRole = $userRoleManager->loadModel([
 			'user_auth_data' => $user->{$authFieldName},
 		]);
+		if ( ! $userRole) {
+			$userRole = $userRoleManager->newModel();
+			$userRole->user_auth_data = $user->{$authFieldName};
+			$userRole->save();
+		}
 
 		$userRole->roles->add($role);
 	}

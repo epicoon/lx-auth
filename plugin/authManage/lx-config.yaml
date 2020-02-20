@@ -5,5 +5,7 @@ rootSnippet: snippets/_root.js
 jsMain: frontend/_main.js
 jsBootstrap: frontend/_bootstrap.js
 
+cacheType: smart
+
 respondents:
   UserRole: backend\UserRoleRespondent

@@ -30,17 +30,6 @@ class RbacAuthorizationGate extends Object implements AuthorizationInterface, Fu
 		];
 	}
 
-	public function checkAccess($user, $responseSource)
-	{
-		$rights = $this->getRightsForSource($responseSource);
-		$ok = $this->checkUserHasRights($user, $rights);
-		if ( ! $ok) {
-			$responseSource->addRestriction(SourceContext::RESTRICTION_INSUFFICIENT_RIGHTS);
-		}
-
-		return $responseSource;
-	}
-
 	public function checkUserHasRights($user, $rights)
 	{
 		$userRights = $this->getUserRights($user);
@@ -70,24 +59,6 @@ class RbacAuthorizationGate extends Object implements AuthorizationInterface, Fu
 		}
 
 		return $service->getModelManager($modelName);
-	}
-
-	/**
-	 * @param SourceContext $source
-	 * @return array
-	 */
-	private function getRightsForSource($source)
-	{
-		$sourceRightManager = $this->getModelManager('AuthSourceRight');
-		$sourceRightModel = $sourceRightManager->loadModel([
-			'source_name' => $source->getSourceName()
-		]);
-
-		if ( ! $sourceRightModel) {
-			return [];
-		}
-
-		return $sourceRightModel->rights->get()->getField('name');
 	}
 
 	/**
