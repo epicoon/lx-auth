@@ -3,7 +3,9 @@
 namespace lx\auth\plugin\authManage;
 
 class Plugin extends \lx\Plugin {
-	public function beforeCompile() {
-		$this->clientParams->userModel = $this->app->userProcessor->getUserModelName();
+	public function init() {
+		$this->params->userModel = $this->app->userProcessor
+			? $this->app->userProcessor->getUserModelName()
+			: '';
 	}
 }

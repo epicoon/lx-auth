@@ -1,10 +1,4 @@
 /**
- * @const lx.Plugin Plugin
- * */
-
-/*
-Косова Анастасия Владимировна
-17,12 - 2726,32
-19,12 - 2726,32
-*/
-
+ * @const {lx.Plugin} Plugin
+ * @const {lx.Snippet} Snippet
+ */

@@ -2,45 +2,41 @@
 
 namespace lx\auth;
 
-use lx\ApplicationToolTrait;
-use lx\Object;
-use lx\Source;
-use lx\SourceVoterInterface;
+use lx\AbstractSourceVoter;
 use lx\User;
 
-class SourceVoter extends Object implements SourceVoterInterface
+class SourceVoter extends AbstractSourceVoter
 {
-	use ApplicationToolTrait;
-
-	protected $owner;
-
+	/**
+	 * @return array
+	 */
 	protected function actionRightsMap()
 	{
-		if (method_exists($this->owner, 'actionRightsMap')) {
-			return $this->owner->actionRightsMap();
+		if (method_exists($this->getSource(), 'actionRightsMap')) {
+			return $this->getSource()->actionRightsMap();
 		}
 		
 		return [];
 	}
 
-	public function setSource(Source $source)
-	{
-		$this->owner = $source;
-	}
-
+	/**
+	 * @param User $user
+	 * @param string $actionName
+	 * @param array $params
+	 * @return bool
+	 */
 	public function run(User $user, $actionName, $params)
 	{
 		$authGate = $this->app->authorizationGate;
 
 		$rights = $this->getActionRights($actionName);
-		return $authGate->checkUserHasRights($user, $rights);
+		return $authGate->checkUserAccess($user, new SourceAccessData($rights));
 	}
 
-	public function processActionParams(User $user, $actionName, $params)
-	{
-		return $params;
-	}
-
+	/**
+	 * @param string $actionName
+	 * @return array
+	 */
 	private function getActionRights($actionName)
 	{
 		$map = $this->actionRightsMap();

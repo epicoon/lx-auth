@@ -4,16 +4,16 @@ namespace lx\auth;
 
 use lx\ApplicationToolTrait;
 use lx\AuthorizationInterface;
-use lx\EventLestenerInterface;
+use lx\EventListenerInterface;
 use lx\EventListenerTrait;
 use lx\FusionComponentInterface;
 use lx\FusionComponentTrait;
-use lx\Object;
+use lx\BaseObject;
 use lx\SourceContext;
 use lx\User;
 use lx\UserEventsEnum;
 
-class RbacAuthorizationGate extends Object implements AuthorizationInterface, FusionComponentInterface
+class RbacAuthorizationGate extends BaseObject implements AuthorizationInterface, FusionComponentInterface
 {
 	use ApplicationToolTrait;
 	use FusionComponentTrait;
@@ -30,10 +30,11 @@ class RbacAuthorizationGate extends Object implements AuthorizationInterface, Fu
 		];
 	}
 
-	public function checkUserHasRights($user, $rights)
+	public function checkUserAccess($user, $accessData)
 	{
 		$userRights = $this->getUserRights($user);
-		foreach ($rights as $right) {
+		$sourceRigths = $accessData->getData();
+		foreach ($sourceRigths as $right) {
 			if ( ! in_array($right, $userRights)) {
 				return false;
 			}

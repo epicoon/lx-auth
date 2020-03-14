@@ -1,13 +1,13 @@
 /**
- * @const lx.Plugin Plugin
- * */
+ * @const {lx.Plugin} Plugin
+ * @const {lx.Snippet} Snippet
+ */
 
 let token = lx.Storage.get('lxauthtoken');
 if (token) trySendToken();
-else lx.createObject(Plugin.clientParams.loginForm);
+else lx.createObject(Plugin.params.loginForm);
 
 function trySendToken() {
-	let token = lx.Storage.get('lxauthtoken');
 	^Respondent.tryAuthenticate().then((res)=>tryAuth(res));
 }
 
@@ -18,20 +18,20 @@ function tryAuth(res) {
 				//TODO пока не знаю что и как сюда удобно будет впилить
 				console.log(res);
 			} else {
-				lx.body.injectPlugin(res)
+				lx.body.setPlugin(res)
 			}
 		});
 	} else if (res.success === false) {
 		if (res.message == 'expired') {
 			let refreshToken = lx.Storage.get('lxauthretoken');
 			if (!refreshToken) {
-				lx.createObject(Plugin.clientParams.loginForm);
+				lx.createObject(Plugin.params.loginForm);
 				return;
 			}
 
 			^Respondent.refreshTokens(refreshToken).then((res)=>{
 				if (!res.token || !res.refreshToken) {
-					lx.createObject(Plugin.clientParams.loginForm);
+					var el = lx.createObject(Plugin.params.loginForm);
 					return;
 				}
 
@@ -40,7 +40,7 @@ function tryAuth(res) {
 				trySendToken();
 			});
 		} else {
-			lx.createObject(Plugin.clientParams.loginForm);
+			lx.createObject(Plugin.params.loginForm);
 		}
 		return;
 	}

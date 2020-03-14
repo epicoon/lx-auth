@@ -2,6 +2,17 @@
 
 namespace lx\auth\plugin\getToken;
 
-class Plugin extends \lx\Plugin {
+use lx\auth\OAuth2AuthenticationGate;
 
+class Plugin extends \lx\Plugin {
+	protected function init()
+	{
+		/** @var OAuth2AuthenticationGate $gate */
+		$gate = $this->app->authenticationGate;
+		if ($gate) {
+			$loginForm = $gate->getLoginFormName();
+			$this->addParam('loginForm', $loginForm);
+			$this->addDependencies(['modules' => [$loginForm]]);
+		}
+	}
 }

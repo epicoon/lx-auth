@@ -74,6 +74,6 @@ class LoginForm extends lx.Box #lx:namespace lx.auth {
 		lx.Storage.set('lxauthretoken', refreshToken);
 
 		var r = new lx.Request(window.location.pathname);
-		r.send().then((res)=>lx.body.injectPlugin(res));
+		r.send().then((res)=>lx.body.setPlugin(res));
 	}
 }

@@ -6,11 +6,11 @@ use lx\ApplicationToolTrait;
 use lx\FusionComponentInterface;
 use lx\FusionComponentTrait;
 use lx\model\Model;
-use lx\Object;
+use lx\BaseObject;
 use lx\UserEventsEnum;
 use lx\UserProcessorInterface;
 
-class UserProcessor extends Object implements UserProcessorInterface, FusionComponentInterface
+class UserProcessor extends BaseObject implements UserProcessorInterface, FusionComponentInterface
 {
 	use ApplicationToolTrait;
 	use FusionComponentTrait;
@@ -60,35 +60,10 @@ class UserProcessor extends Object implements UserProcessorInterface, FusionComp
 		return true;
 	}
 
-	public function getUserData($condition)
-	{
-		if (is_string($condition)) {
-			$condition = [$this->userAuthField => $condition];
-		}
-
-		$manager = $this->getUserManager();
-		return $manager->loadModel($condition);
-	}
-
 	public function getUser($condition)
 	{
 		$userData = $this->getUserData($condition);
 		return $this->getUserByData($userData);
-	}
-
-	public function getUsersData($offset = 0, $limit = null)
-	{
-		$condition = [];
-		if ($offset) {
-			$condition['OFFSET'] = $offset;
-		}
-
-		if ($limit) {
-			$condition['LIMIT'] = $limit;
-		}
-
-		$manager = $this->getUserManager();
-		return $manager->loadModels($condition);
 	}
 
 	public function getUsers($offset = 0, $limit = null)
@@ -186,5 +161,30 @@ class UserProcessor extends Object implements UserProcessorInterface, FusionComp
 		$user->set($userData);
 		$user->setAuthFieldName($this->userAuthField);
 		return $user;
+	}
+
+	private function getUserData($condition)
+	{
+		if (is_string($condition)) {
+			$condition = [$this->userAuthField => $condition];
+		}
+
+		$manager = $this->getUserManager();
+		return $manager->loadModel($condition);
+	}
+
+	private function getUsersData($offset = 0, $limit = null)
+	{
+		$condition = [];
+		if ($offset) {
+			$condition['OFFSET'] = $offset;
+		}
+
+		if ($limit) {
+			$condition['LIMIT'] = $limit;
+		}
+
+		$manager = $this->getUserManager();
+		return $manager->loadModels($condition);
 	}
 }

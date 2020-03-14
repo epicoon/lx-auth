@@ -8,7 +8,7 @@ use lx\AuthenticationInterface;
 use lx\EventListenerTrait;
 use lx\FusionComponentInterface;
 use lx\FusionComponentTrait;
-use lx\Object;
+use lx\BaseObject;
 use lx\SourceContext;
 use lx\UserEventsEnum;
 
@@ -16,7 +16,8 @@ use lx\UserEventsEnum;
  * Class OAuth2AuthenticationGate
  * @package lx\auth
  */
-class OAuth2AuthenticationGate extends Object implements AuthenticationInterface, FusionComponentInterface {
+class OAuth2AuthenticationGate extends BaseObject implements AuthenticationInterface, FusionComponentInterface
+{
 	use ApplicationToolTrait;
 	use FusionComponentTrait;
 	use EventListenerTrait;
@@ -44,21 +45,33 @@ class OAuth2AuthenticationGate extends Object implements AuthenticationInterface
 	 * 'userModel' => 'some/service.modelName'
 	 * Второй способ:
 	 * 'userModel' => [
-	 * 		'service' => 'some/service',
-	 * 		'name' => 'modelName'
+	 *        'service' => 'some/service',
+	 *        'name' => 'modelName'
 	 * ]
 	 * */
-	public function __construct($config = []) {
+	public function __construct($config = [])
+	{
 		parent::__construct($config);
 
 		$this->authProblem = self::AUTH_PROBLEM_NO;
 	}
 
+	/**
+	 * @return array
+	 */
 	public static function getEventHandlersMap()
 	{
 		return [
 			UserEventsEnum::BEFORE_USER_DELETE => 'onUserDelete',
 		];
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getLoginFormName()
+	{
+		return $this->loginForm;
 	}
 
 
@@ -75,8 +88,9 @@ class OAuth2AuthenticationGate extends Object implements AuthenticationInterface
 	 * - По полю логина модели ищем модель пользователя
 	 * - Если модель пользователя не найдена - компонент "пользователь" остается гостем
 	 * */
-	public function authenticateUser() {
-		if ( ! $this->app->user->isAvailable()) {
+	public function authenticateUser()
+	{
+		if (!$this->app->user->isAvailable()) {
 			$this->authProblem = self::AUTH_PROBLEM_USER_COMPONENT_IS_UNAVAILABLE;
 			return false;
 		}
@@ -109,7 +123,7 @@ class OAuth2AuthenticationGate extends Object implements AuthenticationInterface
 			return false;
 		}
 	}
-	
+
 	public function tokenIsExpired()
 	{
 		return $this->authProblem = self::AUTH_PROBLEM_TOKEN_EXPIRED;
@@ -118,30 +132,18 @@ class OAuth2AuthenticationGate extends Object implements AuthenticationInterface
 	/**
 	 * Сформировать ответ, пытающийся авторизовать пользователя
 	 * */
-	public function responseToAuthenticate() {
+	public function responseToAuthenticate()
+	{
 		switch ($this->authProblem) {
 			// Группа проблем, где можно инициировать аутентификацию
 			case self::AUTH_PROBLEM_TOKEN_NOT_RETRIEVED:
 			case self::AUTH_PROBLEM_TOKEN_EXPIRED:
 				// Послать плагин, который поищет токен доступа
 				$arr = explode(':', $this->checkTokenPlugin);
-				$service  = $arr[0];
-				$plugin = $arr[1];
-				$data = [
-					'service' => $service,
-					'plugin' => $plugin,
-					'method' => 'build',
-				];
-				if ($this->loginForm) {
-					$data['clientParams'] = [
-						'loginForm' => $this->loginForm,
-					];
-					$data['dependencies'] = [
-						'modules' => [$this->loginForm],
-					];
-				}
-
-				return new SourceContext($data);
+				return new SourceContext([
+					'service' => $arr[0],
+					'plugin' => $arr[1],
+				]);
 
 			// Группа проблем, не разрешающихся аутентификацией
 			case self::AUTH_PROBLEM_NO:
@@ -166,7 +168,8 @@ class OAuth2AuthenticationGate extends Object implements AuthenticationInterface
 	 * PUBLIC
 	 *************************************************************************************************************************/
 
-	public function updateAccessTokenForUser($user) {
+	public function updateAccessTokenForUser($user)
+	{
 		return $this->updateTokenForUser(
 			$user,
 			$this->getModelManager('AccessToken'),
@@ -174,7 +177,8 @@ class OAuth2AuthenticationGate extends Object implements AuthenticationInterface
 		);
 	}
 
-	public function updateRefreshTokenForUser($user) {
+	public function updateRefreshTokenForUser($user)
+	{
 		return $this->updateTokenForUser(
 			$user,
 			$this->getModelManager('RefreshToken'),
@@ -182,7 +186,8 @@ class OAuth2AuthenticationGate extends Object implements AuthenticationInterface
 		);
 	}
 
-	public function refreshTokens($refreshToken) {
+	public function refreshTokens($refreshToken)
+	{
 		$arr = explode(' ', $refreshToken);
 		if ($arr[0] != 'Bearer') {
 			return false;
@@ -204,7 +209,7 @@ class OAuth2AuthenticationGate extends Object implements AuthenticationInterface
 		}
 
 		$user = $this->app->userProcessor->getUser($refreshTokenModel->user_login);
-		if ( ! $user) {
+		if (!$user) {
 			$this->authProblem = self::AUTH_PROBLEM_USER_NOT_FOUND;
 			return false;
 		}
@@ -215,7 +220,8 @@ class OAuth2AuthenticationGate extends Object implements AuthenticationInterface
 		];
 	}
 
-	public function logOut($user = null) {
+	public function logOut($user = null)
+	{
 		if ($user === null) {
 			$user = $this->app->user;
 			if ($user->isGuest()) {
@@ -253,7 +259,8 @@ class OAuth2AuthenticationGate extends Object implements AuthenticationInterface
 	 * @param $modelName string
 	 * @return \lx\model\ModelManager|null
 	 */
-	protected function getModelManager($modelName) {
+	protected function getModelManager($modelName)
+	{
 		$service = $this->app->getService($this->tokenServiceName);
 		if (!$service) {
 			return null;
@@ -272,15 +279,16 @@ class OAuth2AuthenticationGate extends Object implements AuthenticationInterface
 	 *
 	 * @return string|null
 	 */
-	private function retrieveToken() {
+	private function retrieveToken()
+	{
 		$token = null;
 
-		$authHeader = $this->app->dialog->header('Authorization');
+		$authHeader = $this->app->dialog->getHeader('Authorization');
 		if ($authHeader) {
 			$token = $authHeader;
 		}
 
-		$authCookie = $this->app->dialog->cookie()->getFirstDefined(['auth', 'authorization', 'token'], false);
+		$authCookie = $this->app->dialog->getCookie()->getFirstDefined(['auth', 'authorization', 'token'], false);
 		if ($authCookie) {
 			$token = $authCookie;
 		}
@@ -297,7 +305,8 @@ class OAuth2AuthenticationGate extends Object implements AuthenticationInterface
 		return $token;
 	}
 
-	private function updateTokenForUser($user, $manager, $lifetime) {
+	private function updateTokenForUser($user, $manager, $lifetime)
+	{
 		$token = $manager->loadModel(['user_login' => $user->getAuthField()]);
 		if (!$token) {
 			$token = $manager->newModel();
@@ -312,15 +321,18 @@ class OAuth2AuthenticationGate extends Object implements AuthenticationInterface
 		return $token;
 	}
 
-	private function getAccessTokenLifetime() {
+	private function getAccessTokenLifetime()
+	{
 		return $this->accessTokenLifetime;
 	}
 
-	private function getRefreshTokenLifetime() {
+	private function getRefreshTokenLifetime()
+	{
 		return $this->refreshTokenLifetime;
 	}
 
-	private function genTokenForUser($user) {
+	private function genTokenForUser($user)
+	{
 		if ($this->tokenGenerator) {
 			return $this->tokenGenerator->generate();
 		} else {
