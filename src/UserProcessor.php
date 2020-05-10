@@ -15,7 +15,7 @@ class UserProcessor extends BaseObject implements UserProcessorInterface, Fusion
 	use ApplicationToolTrait;
 	use FusionComponentTrait;
 
-	protected $serviceName = 'lx/lx-auth';
+	protected $serviceName = 'lx/auth';
 	protected $userAuthFields = 'login';
 	protected $userAuthField = 'login';
 	protected $userPasswordField = 'password';

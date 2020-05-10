@@ -33,8 +33,8 @@ class OAuth2AuthenticationGate extends BaseObject implements AuthenticationInter
 	protected $refreshTokenLifetime = 84600;
 	protected $tokenGenerator = null;
 
-	protected $tokenServiceName = 'lx/lx-auth';
-	protected $checkTokenPlugin = 'lx/lx-auth:getToken';
+	protected $tokenServiceName = 'lx/auth';
+	protected $checkTokenPlugin = 'lx/auth:getToken';
 	protected $loginForm = 'lx.auth.LoginForm';
 
 	private $authProblem;

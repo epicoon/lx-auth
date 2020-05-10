@@ -19,8 +19,8 @@ class RbacAuthorizationGate extends BaseObject implements AuthorizationInterface
 	use FusionComponentTrait;
 	use EventListenerTrait;
 
-	protected $rbacServiceName = 'lx/lx-auth';
-	protected $rbacManagePluginName = 'lx/lx-auth:authManage';
+	protected $rbacServiceName = 'lx/auth';
+	protected $rbacManagePluginName = 'lx/auth:authManage';
 
 	public static function getEventHandlersMap()
 	{

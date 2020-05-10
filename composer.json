@@ -1,5 +1,5 @@
 {
-    "name": "lx/lx-auth",
+    "name": "lx/auth",
     "description": "Lx framework service",
     "version": "1.0.0",
     "keywords": ["lx", "auth"],
@@ -11,7 +11,7 @@
         }
     ],
     "require":{
-        "lx/lx-core":"dev-master"
+        "lx/core":"dev-master"
     },
     "repositories":[
         {

@@ -1,4 +1,4 @@
-name: lx/lx-auth
+name: lx/auth
 
 autoload:
   psr-4:

@@ -7,8 +7,8 @@ use lx\model\plugin\relationManager\backend\Respondent;
 
 class UserRoleRespondent extends Respondent
 {
-	private $roleModelName = 'lx/lx-auth.AuthRole';
-	private $userRoleModelName = 'lx/lx-auth.AuthUserRole';
+	private $roleModelName = 'lx/auth.AuthRole';
+	private $userRoleModelName = 'lx/auth.AuthUserRole';
 
 	public function getBaseInfo($userModelName, $condition0, $condition1, $pages)
 	{

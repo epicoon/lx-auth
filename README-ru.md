@@ -33,7 +33,7 @@
 ```php
 'configInjection' => [
 	//...
-	'lx/lx-auth' => [
+	'lx/auth' => [
 		'db' => [
 			'hostname' => 'localhost',
 			'username' => 'lx',
