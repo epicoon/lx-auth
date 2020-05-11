@@ -2,53 +2,28 @@
 
 Расширение для lx-платформы, включающее аутентификацию и авторизацию.
 
-
-// Пока черновик...
-
-
-
 Подключаем компоненты к приложению (в главном конфиге):
-'userModel' => 'usertest.User', - модель юзера: usertest - название сервиса, User - название самой модели
-'userAuthFields' => 'email', - поле (или поля), по которому (помимо пароля) будет происходить поиск юзеров
-'userAuthField' => 'email', - поле (одно из userAuthFields), с которым будут связаны токены
 
 ```php
 'components' => [
-	//...
-	'authenticationGate' => [
-		'class' => lx\auth\OAuth2AuthenticationGate::class,
+	'userProcessor' => [
+		'class' => lx\auth\UserProcessor::class,
+		
+		// модель юзера: usertest - название сервиса, User - название самой модели
 		'userModel' => 'usertest.User',
+		
+		// поле (или поля), по которому (помимо пароля) будет происходить поиск юзеров
 		'userAuthFields' => 'email',
+		
+		// поле (одно из userAuthFields), с которым будут связаны токены
 		'userAuthField' => 'email',
 	],
 
-	'authorizationGate' => [
-		'class' => lx\auth\RbacAuthorizationGate::class,
-	],
-	//...
+	'authenticationGate' => lx\auth\OAuth2AuthenticationGate::class,
+	'authorizationGate' => lx\auth\RbacAuthorizationGate::class,
 ]
 ```
 
-Внедряем сервису настройки подключения к базе (для хранения токенов)
-```php
-'configInjection' => [
-	//...
-	'lx/auth' => [
-		'db' => [
-			'hostname' => 'localhost',
-			'username' => 'lx',
-			'password' => '123456',
-			'dbName' => 'lxtest',
-		],
-	],
-	//...
-]
-```
-Проверяем, чтобы база существовала, все дела.
+Проверяем, что работает CRUD
 
-Накатываем миграции (через web-cli) - две миграции для создания таблиц токенов.
-
-Проверяем для модели юзера чтобы было подключение к базе, миграции на создание таблиц для модели на мекачены.
-
-
-//==============================
+Накатываем миграции
