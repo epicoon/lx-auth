@@ -8,40 +8,45 @@ if (token) trySendToken();
 else lx.createObject(Plugin.params.loginForm);
 
 function trySendToken() {
-	^Respondent.tryAuthenticate().then((res)=>tryAuth(res));
+	^Respondent.tryAuthenticate()
+		.then(res=>tryAuth(res))
+		.catch(res=>checkResultProblems(res));
 }
 
 function tryAuth(res) {
-	if (res.success === true) {
-		(new lx.Request(document.location.pathname)).send().then((res)=>{
-			if (res.success === false) {
-				//TODO пока не знаю что и как сюда удобно будет впилить
-				console.log(res);
-			} else {
-				lx.body.setPlugin(res)
-			}
-		});
-	} else if (res.success === false) {
-		if (res.message == 'expired') {
-			let refreshToken = lx.Storage.get('lxauthretoken');
-			if (!refreshToken) {
-				lx.createObject(Plugin.params.loginForm);
-				return;
-			}
+	(new lx.Request(document.location.pathname)).send()
+		.then(res=>lx.body.setPlugin(res))
+		.catch(res=>checkResultProblems(res));
+}
 
-			^Respondent.refreshTokens(refreshToken).then((res)=>{
-				if (!res.token || !res.refreshToken) {
-					var el = lx.createObject(Plugin.params.loginForm);
-					return;
-				}
+function tryRefreshTokens() {
+	let refreshToken = lx.Storage.get('lxauthretoken');
+	if (!refreshToken) return false;
 
-				lx.Storage.set('lxauthtoken', res.token);
-				lx.Storage.set('lxauthretoken', res.refreshToken);
-				trySendToken();
-			});
-		} else {
+	^Respondent.refreshTokens(refreshToken)
+		.then(res=>refreshTokens(res))
+		.catch(res=>checkResultProblems(res));
+
+	return true;
+}
+
+function refreshTokens(res) {
+	if (res.token && res.refreshToken) {
+		lx.Storage.set('lxauthtoken', res.token);
+		lx.Storage.set('lxauthretoken', res.refreshToken);
+		trySendToken();
+	}
+}
+
+function checkResultProblems(res) {
+	switch (res.error_code) {
+		case 401:
+			if (res.error_details && res.error_details[0] == 'expired' && tryRefreshTokens()) break;
 			lx.createObject(Plugin.params.loginForm);
-		}
-		return;
+			break;
+		case 403:
+			lx.Tost.warning('Resource is unavailable');
+			break;
+		default: lx.Tost.error(res.error_details || 'Internal server error');
 	}
 }

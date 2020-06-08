@@ -2,28 +2,24 @@
 
 namespace lx\auth\plugin\getToken\backend;
 
+use lx\ResponseCodeEnum;
+
 class Respondent extends \lx\Respondent
 {
 	public function tryAuthenticate()
 	{
 		$gate = $this->app->authenticationGate;
-		
-		$result = $gate->authenticateUser();
-		if ($result) {
-			return ['success' => true];
+		if ($gate->authenticateUser()) {
+
+		    return $this->prepareResponse('Ok');
 		}
 
 		if ($gate->tokenIsExpired()) {
-			return [
-				'success' => false,
-				'message' => 'expired',
-			];
+
+		    return $this->prepareErrorResponse('expired', ResponseCodeEnum::UNAUTHORIZED);
 		}
 
-		return [
-			'success' => false,
-			'message' => 'unknown',
-		];
+		return $this->prepareErrorResponse('Internal server error');
 	}
 	
 	public function refreshTokens($refreshToken)
@@ -32,13 +28,24 @@ class Respondent extends \lx\Respondent
 
 		$pare = $gate->refreshTokens($refreshToken);
 		if ($pare === false) {
-			return ['success' => false, 'error' => 403];
+		    if ($gate->tokenIsExpired()) {
+
+		        return $this->prepareErrorResponse(
+                    'Resource is unavailable',
+                    ResponseCodeEnum::UNAUTHORIZED
+                );
+            } else {
+
+		        return $this->prepareErrorResponse(
+                    'Resource is unavailable',
+                    ResponseCodeEnum::FORBIDDEN
+                );
+            }
 		}
 
-		return [
-			'success' => true,
-			'token' => 'Bearer ' . $pare[0]->token,
-			'refreshToken' => 'Bearer ' . $pare[1]->token,
-		];
+		return $this->prepareResponse([
+            'token' => 'Bearer ' . $pare[0]->token,
+            'refreshToken' => 'Bearer ' . $pare[1]->token,
+        ]);
 	}
 }

@@ -8,7 +8,7 @@ use lx\AuthenticationInterface;
 use lx\EventListenerTrait;
 use lx\FusionComponentInterface;
 use lx\FusionComponentTrait;
-use lx\BaseObject;
+use lx\ObjectTrait;
 use lx\SourceContext;
 use lx\UserEventsEnum;
 
@@ -16,8 +16,9 @@ use lx\UserEventsEnum;
  * Class OAuth2AuthenticationGate
  * @package lx\auth
  */
-class OAuth2AuthenticationGate extends BaseObject implements AuthenticationInterface, FusionComponentInterface
+class OAuth2AuthenticationGate implements AuthenticationInterface, FusionComponentInterface
 {
+    use ObjectTrait;
 	use ApplicationToolTrait;
 	use FusionComponentTrait;
 	use EventListenerTrait;
@@ -51,7 +52,7 @@ class OAuth2AuthenticationGate extends BaseObject implements AuthenticationInter
 	 * */
 	public function __construct($config = [])
 	{
-		parent::__construct($config);
+        $this->__objectConstruct($config);
 
 		$this->authProblem = self::AUTH_PROBLEM_NO;
 	}
@@ -104,6 +105,11 @@ class OAuth2AuthenticationGate extends BaseObject implements AuthenticationInter
 		$accessTokenManager = $this->getModelManager('AccessToken');
 		$accessTokenModel = $accessTokenManager->loadModel(['token' => $accessToken]);
 		if (!$accessTokenModel) {
+            \lx::devLog(['_'=>[__FILE__,__CLASS__,__METHOD__,__LINE__],
+                '__trace__' => debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT&DEBUG_BACKTRACE_IGNORE_ARGS),
+                'msg' => "Access token '$accessToken' not found",
+            ]);
+
 			$this->authProblem = self::AUTH_PROBLEM_TOKEN_NOT_FOUND;
 			return false;
 		}
@@ -126,7 +132,7 @@ class OAuth2AuthenticationGate extends BaseObject implements AuthenticationInter
 
 	public function tokenIsExpired()
 	{
-		return $this->authProblem = self::AUTH_PROBLEM_TOKEN_EXPIRED;
+		return $this->authProblem == self::AUTH_PROBLEM_TOKEN_EXPIRED;
 	}
 
 	/**
@@ -288,10 +294,15 @@ class OAuth2AuthenticationGate extends BaseObject implements AuthenticationInter
 			$token = $authHeader;
 		}
 
-		$authCookie = $this->app->dialog->getCookie()->getFirstDefined(['auth', 'authorization', 'token'], false);
-		if ($authCookie) {
-			$token = $authCookie;
-		}
+		if ($token === null) {
+            $authCookie = $this->app->dialog->getCookie()->getFirstDefined(
+                ['auth', 'authorization', 'token'],
+                false
+            );
+            if ($authCookie) {
+                $token = $authCookie;
+            }
+        }
 
 		if ($token) {
 			$arr = explode(' ', $token);

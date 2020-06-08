@@ -8,13 +8,14 @@ use lx\EventListenerInterface;
 use lx\EventListenerTrait;
 use lx\FusionComponentInterface;
 use lx\FusionComponentTrait;
-use lx\BaseObject;
+use lx\ObjectTrait;
 use lx\SourceContext;
 use lx\User;
 use lx\UserEventsEnum;
 
-class RbacAuthorizationGate extends BaseObject implements AuthorizationInterface, FusionComponentInterface
+class RbacAuthorizationGate implements AuthorizationInterface, FusionComponentInterface
 {
+    use ObjectTrait;
 	use ApplicationToolTrait;
 	use FusionComponentTrait;
 	use EventListenerTrait;
@@ -63,7 +64,7 @@ class RbacAuthorizationGate extends BaseObject implements AuthorizationInterface
 	}
 
 	/**
-	 * @param $user User
+	 * @param User $user
 	 * @return mixed
 	 */
 	private function getUserRights($user)

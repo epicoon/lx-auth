@@ -47,33 +47,35 @@ class LoginForm extends lx.Box #lx:namespace lx.auth {
 		this->send.click(()=>{
 			^self::login(this->login.value(), this->password.value()).then((res)=>{
 				if (res.success === false) {
-					lx.Tost.warning(res.message);
+					lx.Tost.warning(res.error_details[0]);
 					return;
 				}
 
-				__saveTokens(res.token, res.refreshToken);
+				__applyTokens(res.token, res.refreshToken);
 			});
 		});
 
 		this->register.click(()=>{
 			^self::register(this->login.value(), this->password.value()).then((res)=>{
 				if (res.success === false) {
-					lx.Tost.warning(res.message);
+					lx.Tost.warning(res.error_details[0]);
 					return;
 				}
 
-				__saveTokens(res.token, res.refreshToken);
+				__applyTokens(res.token, res.refreshToken);
 			});
 		});
 	}
 }
 
 #lx:client {
-	function __saveTokens(token, refreshToken) {
+	function __applyTokens(token, refreshToken) {
 		lx.Storage.set('lxauthtoken', token);
 		lx.Storage.set('lxauthretoken', refreshToken);
 
-		var r = new lx.Request(window.location.pathname);
-		r.send().then((res)=>lx.body.setPlugin(res));
+		window.location.reload();
+		//TODO может так оно получше, только надо понимать что дальше с полученным делать. Коллбэк?
+		// var r = new lx.Request(window.location.pathname);
+		// r.send().then((res)=>lx.body.setPlugin(res));
 	}
 }

@@ -6,23 +6,23 @@ use lx\ApplicationToolTrait;
 use lx\FusionComponentInterface;
 use lx\FusionComponentTrait;
 use lx\model\Model;
-use lx\BaseObject;
+use lx\ObjectTrait;
 use lx\UserEventsEnum;
 use lx\UserProcessorInterface;
 
-class UserProcessor extends BaseObject implements UserProcessorInterface, FusionComponentInterface
+class UserProcessor implements UserProcessorInterface, FusionComponentInterface
 {
+    use ObjectTrait;
 	use ApplicationToolTrait;
 	use FusionComponentTrait;
 
-	protected $serviceName = 'lx/auth';
 	protected $userAuthFields = 'login';
 	protected $userAuthField = 'login';
 	protected $userPasswordField = 'password';
 	private $userModelName;
 
 	public function __construct($config = []) {
-		parent::__construct($config);
+	    $this->__objectConstruct($config);
 
 		$userModel = $config['userModel'];
 		if (is_string($userModel)) {
@@ -157,7 +157,7 @@ class UserProcessor extends BaseObject implements UserProcessorInterface, Fusion
 		}
 
 		$class = get_class($this->app->user);
-		$user = new $class();
+		$user = $this->app->diProcessor->create($class);
 		$user->set($userData);
 		$user->setAuthFieldName($this->userAuthField);
 		return $user;
