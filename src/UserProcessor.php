@@ -6,8 +6,10 @@ use lx\ApplicationToolTrait;
 use lx\FusionComponentInterface;
 use lx\FusionComponentTrait;
 use lx\model\Model;
+use lx\ModelInterface;
 use lx\ObjectTrait;
 use lx\UserEventsEnum;
+use lx\UserInterface;
 use lx\UserProcessorInterface;
 
 class UserProcessor implements UserProcessorInterface, FusionComponentInterface
@@ -16,9 +18,10 @@ class UserProcessor implements UserProcessorInterface, FusionComponentInterface
 	use ApplicationToolTrait;
 	use FusionComponentTrait;
 
-	protected $userAuthFields = 'login';
-	protected $userAuthField = 'login';
-	protected $userPasswordField = 'password';
+    private $userAuthFields = 'login';
+    private $userAuthField = 'login';
+    private $userPasswordField = 'password';
+	private $publicFields = [];
 	private $userModelName;
 
 	public function __construct($config = []) {
@@ -47,10 +50,20 @@ class UserProcessor implements UserProcessorInterface, FusionComponentInterface
 		return $this->userPasswordField;
 	}
 
+    /**
+     * @param mixed $authValue
+     * @return ModelInterface|null
+     */
+	public function getUserModel($authValue)
+    {
+        $userManager = $this->getUserManager();
+        $model = $userManager->loadModel([$this->userAuthField => $authValue]);
+        return $model;
+    }
+
 	public function setApplicationUser($authValue)
 	{
-		$userManager = $this->getUserManager();
-		$userData = $userManager->loadModel([$this->userAuthField => $authValue]);
+		$userData = $this->getUserModel($authValue);
 		if ( ! $userData) {
 			return false;
 		}
@@ -60,7 +73,34 @@ class UserProcessor implements UserProcessorInterface, FusionComponentInterface
 		return true;
 	}
 
-	public function getUser($condition)
+    /**
+     * @return array
+     */
+	public function getPublicData()
+    {
+        /** @var UserInterface $user */
+        $user = $this->app->user;
+
+        if ($user->isGuest()) {
+            return [];
+        }
+
+        $result = [];
+        foreach ($this->publicFields as $field) {
+            $value = $user->$field;
+            if ($value !== null) {
+                $result[$field] = $value;
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * @param array|string $condition
+     * @return UserInterface
+     */
+    public function getUser($condition)
 	{
 		$userData = $this->getUserData($condition);
 		return $this->getUserByData($userData);
@@ -150,6 +190,10 @@ class UserProcessor implements UserProcessorInterface, FusionComponentInterface
 		return password_hash($password, PASSWORD_DEFAULT, $options);
 	}
 
+    /**
+     * @param $userData
+     * @return UserInterface
+     */
 	private function getUserByData($userData)
 	{
 		if ( ! $userData) {

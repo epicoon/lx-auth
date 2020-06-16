@@ -14,6 +14,7 @@ function trySendToken() {
 }
 
 function tryAuth(res) {
+	lx.User.set(res);
 	(new lx.Request(document.location.pathname)).send()
 		.then(res=>lx.body.setPlugin(res))
 		.catch(res=>checkResultProblems(res));

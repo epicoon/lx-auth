@@ -11,7 +11,9 @@ class Respondent extends \lx\Respondent
 		$gate = $this->app->authenticationGate;
 		if ($gate->authenticateUser()) {
 
-		    return $this->prepareResponse('Ok');
+		    return $this->prepareResponse(
+		        $this->app->userProcessor->getPublicData()
+            );
 		}
 
 		if ($gate->tokenIsExpired()) {

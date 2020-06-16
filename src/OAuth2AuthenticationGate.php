@@ -8,6 +8,7 @@ use lx\AuthenticationInterface;
 use lx\EventListenerTrait;
 use lx\FusionComponentInterface;
 use lx\FusionComponentTrait;
+use lx\ModelInterface;
 use lx\ObjectTrait;
 use lx\SourceContext;
 use lx\UserEventsEnum;
@@ -130,11 +131,6 @@ class OAuth2AuthenticationGate implements AuthenticationInterface, FusionCompone
 		}
 	}
 
-	public function tokenIsExpired()
-	{
-		return $this->authProblem == self::AUTH_PROBLEM_TOKEN_EXPIRED;
-	}
-
 	/**
 	 * Сформировать ответ, пытающийся авторизовать пользователя
 	 * */
@@ -173,6 +169,29 @@ class OAuth2AuthenticationGate implements AuthenticationInterface, FusionCompone
 	/**************************************************************************************************************************
 	 * PUBLIC
 	 *************************************************************************************************************************/
+
+    /**
+     * @param string $accessToken
+     * @return ModelInterface|null
+     */
+	public function getUserModelByAccessToken($accessToken)
+    {
+        $accessToken = preg_replace('/^Bearer /', '', $accessToken);
+
+        $accessTokenManager = $this->getModelManager('AccessToken');
+        $accessTokenModel = $accessTokenManager->loadModel(['token' => $accessToken]);
+        if (!$accessTokenModel) {
+
+            return null;
+        }
+
+        return $this->app->userProcessor->getUserModel($accessTokenModel->user_login);
+    }
+
+    public function tokenIsExpired()
+    {
+        return $this->authProblem == self::AUTH_PROBLEM_TOKEN_EXPIRED;
+    }
 
 	public function updateAccessTokenForUser($user)
 	{
