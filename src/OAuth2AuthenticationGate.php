@@ -165,6 +165,14 @@ class OAuth2AuthenticationGate implements AuthenticationInterface, FusionCompone
 		return false;
 	}
 
+    /**
+     * @return int
+     */
+	public function getProblemCode()
+    {
+        return $this->authProblem;
+    }
+
 
 	/**************************************************************************************************************************
 	 * PUBLIC

@@ -2,12 +2,15 @@
 
 namespace lx\auth\plugin\getToken\backend;
 
+use lx\auth\OAuth2AuthenticationGate;
+use lx\AuthenticationInterface;
 use lx\ResponseCodeEnum;
 
 class Respondent extends \lx\Respondent
 {
 	public function tryAuthenticate()
 	{
+	    /** @var AuthenticationInterface $gate */
 		$gate = $this->app->authenticationGate;
 		if ($gate->authenticateUser()) {
 
@@ -20,6 +23,11 @@ class Respondent extends \lx\Respondent
 
 		    return $this->prepareErrorResponse('expired', ResponseCodeEnum::UNAUTHORIZED);
 		}
+		
+		if ($gate->getProblemCode() == OAuth2AuthenticationGate::AUTH_PROBLEM_TOKEN_NOT_FOUND) {
+
+            return $this->prepareErrorResponse('token not found', ResponseCodeEnum::UNAUTHORIZED);
+        }
 
 		return $this->prepareErrorResponse('Internal server error');
 	}
