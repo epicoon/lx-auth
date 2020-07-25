@@ -11,7 +11,7 @@ class Plugin extends \lx\Plugin {
 		$gate = $this->app->authenticationGate;
 		if ($gate) {
 			$loginForm = $gate->getLoginFormName();
-			$this->addParam('loginForm', $loginForm);
+			$this->addAttribute('loginForm', $loginForm);
 			$this->addDependencies(['modules' => [$loginForm]]);
 		}
 	}

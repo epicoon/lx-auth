@@ -2,7 +2,7 @@ const userRoleEventHandlers = {
 	start: (core, condition0 = '', condition1 = '', page0 = 0, page1 = 0)=>{
 		var plugin = core.plugin.parent;
 		plugin.ajax('UserRole.getBaseInfo', [
-			plugin.params.userModel,
+			plugin.attributes.userModel,
 			condition0,
 			condition1,
 			[

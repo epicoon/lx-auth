@@ -23,7 +23,7 @@ body.begin();
 	var boxRights = mbox.sheet(0).add(lx.Box, {geom:['10px', '10px', null, null, '10px', '10px']});
 	boxRights.setPlugin({
 		name: 'lx/model:relationManager',
-		params: {
+		attributes: {
 			models: ['lx/auth.AuthRight', 'lx/auth.AuthRole']
 		}
 	});
@@ -31,8 +31,8 @@ body.begin();
 	var boxUsers = mbox.sheet(1).add(lx.Box, {geom:['10px', '10px', null, null, '10px', '10px']});
 	boxUsers.setPlugin({
 		name: 'lx/model:relationManager',
-		params: {
-			models: [Plugin.params.userModel, 'lx/auth.AuthRole'],
+		attributes: {
+			models: [Plugin.attributes.userModel, 'lx/auth.AuthRole'],
 			eventHandlers: userRoleEventHandlers
 		}
 	});

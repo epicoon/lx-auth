@@ -5,7 +5,7 @@
 
 let token = lx.Storage.get('lxauthtoken');
 if (token) trySendToken();
-else lx.createObject(Plugin.params.loginForm);
+else lx.createObject(Plugin.attributes.loginForm);
 
 function trySendToken() {
 	^Respondent.tryAuthenticate()
@@ -43,7 +43,7 @@ function checkResultProblems(res) {
 	switch (res.error_code) {
 		case 401:
 			if (res.error_details && res.error_details[0] == 'expired' && tryRefreshTokens()) break;
-			lx.createObject(Plugin.params.loginForm);
+			lx.createObject(Plugin.attributes.loginForm);
 			break;
 		case 403:
 			lx.Tost.warning('Resource is unavailable');
