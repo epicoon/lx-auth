@@ -1,7 +1,7 @@
 {
     "lx.auth.LoginForm": {
         "name": "lx.auth.LoginForm",
-        "path": "vendor\/lx\/auth\/src\/LoginForm\/_LoginForm.js",
+        "path": "src\/LoginForm\/_LoginForm.js",
         "data": {
             "i18n": "i18n.yaml",
             "backend": "lx\\auth\\LoginForm"
@@ -9,7 +9,7 @@
     },
     "lx.auth.LogoutButton": {
         "name": "lx.auth.LogoutButton",
-        "path": "vendor\/lx\/auth\/src\/LogoutButton\/_LogoutButton.js",
+        "path": "src\/LogoutButton\/_LogoutButton.js",
         "data": {
             "backend": "lx\\auth\\LogoutButton"
         }
