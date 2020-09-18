@@ -2,10 +2,10 @@
 
 namespace lx\auth;
 
-use lx\AbstractSourceVoter;
+use lx\AbstractResourceVoter;
 use lx\User;
 
-class RbacSourceVoter extends AbstractSourceVoter
+class RbacResourceVoter extends AbstractResourceVoter
 {
 	/**
 	 * @param User $user
@@ -21,7 +21,7 @@ class RbacSourceVoter extends AbstractSourceVoter
         }
 
 		$rights = $this->getActionRights($actionName);
-		return $authGate->checkUserAccess($user, new SourceAccessData($rights));
+		return $authGate->checkUserAccess($user, new ResourceAccessData($rights));
 	}
 
     /**
@@ -44,8 +44,8 @@ class RbacSourceVoter extends AbstractSourceVoter
      */
     private function actionRightsMap()
     {
-        if (method_exists($this->getSource(), 'getPermissions')) {
-            return $this->getSource()->getPermissions();
+        if ($this->getResource() instanceof RbacResourceInterface) {
+            return $this->getResource()->getPermissions();
         }
 
         return [];

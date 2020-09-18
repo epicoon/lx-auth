@@ -9,7 +9,7 @@ use lx\EventListenerTrait;
 use lx\FusionComponentInterface;
 use lx\FusionComponentTrait;
 use lx\ObjectTrait;
-use lx\SourceContext;
+use lx\ResourceContext;
 use lx\User;
 use lx\UserEventsEnum;
 
@@ -34,8 +34,8 @@ class RbacAuthorizationGate implements AuthorizationInterface, FusionComponentIn
 	public function checkUserAccess($user, $accessData)
 	{
 		$userRights = $this->getUserRights($user);
-		$sourceRigths = $accessData->getData();
-		foreach ($sourceRigths as $right) {
+		$resourceRigths = $accessData->getData();
+		foreach ($resourceRigths as $right) {
 			if ( ! in_array($right, $userRights)) {
 				return false;
 			}

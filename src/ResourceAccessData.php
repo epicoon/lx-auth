@@ -2,19 +2,19 @@
 
 namespace lx\auth;
 
-use lx\SourceAccessDataInterface;
+use lx\ResourceAccessDataInterface;
 
 /**
- * Class SourceAccessData
+ * Class ResourceAccessData
  * @package lx\auth
  */
-class SourceAccessData implements SourceAccessDataInterface
+class ResourceAccessData implements ResourceAccessDataInterface
 {
 	/** @var array */
 	private $rights;
 
 	/**
-	 * SourceAccessData constructor.
+	 * ResourceAccessData constructor.
 	 * @param array $rights
 	 */
 	public function __construct($rights)

@@ -10,7 +10,7 @@ use lx\FusionComponentInterface;
 use lx\FusionComponentTrait;
 use lx\ModelInterface;
 use lx\ObjectTrait;
-use lx\SourceContext;
+use lx\ResourceContext;
 use lx\UserEventsEnum;
 
 /**
@@ -142,7 +142,7 @@ class OAuth2AuthenticationGate implements AuthenticationInterface, FusionCompone
 			case self::AUTH_PROBLEM_TOKEN_EXPIRED:
 				// Послать плагин, который поищет токен доступа
 				$arr = explode(':', $this->checkTokenPlugin);
-				return new SourceContext([
+				return new ResourceContext([
 					'service' => $arr[0],
 					'plugin' => $arr[1],
 				]);
