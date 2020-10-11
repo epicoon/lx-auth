@@ -5,7 +5,7 @@ rootSnippet: snippets/_root.js
 jsMain: frontend/_main.js
 jsBootstrap: frontend/_bootstrap.js
 
-cacheType: strict
+cacheType: on
 
 respondents:
   Respondent: backend\Respondent
