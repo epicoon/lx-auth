@@ -1,0 +1,69 @@
+actions:
+  - type: createTable
+    schema:
+      name: AccessToken
+      fields:
+        token:
+          type: string
+          required: false
+          size: 256
+        userAuthValue:
+          type: string
+          required: false
+          size: 256
+        expire:
+          type: string
+          required: false
+          size: 256
+  - type: createTable
+    schema:
+      name: DefaultList
+      fields:
+        type:
+          type: string
+          required: false
+          size: 256
+        value:
+          type: string
+          required: false
+          size: 256
+  - type: createTable
+    schema:
+      name: RefreshToken
+      fields:
+        token:
+          type: string
+          required: false
+          size: 256
+        userAuthValue:
+          type: string
+          required: false
+          size: 256
+        expire:
+          type: string
+          required: false
+          size: 256
+  - type: createTable
+    schema:
+      name: Right
+      fields:
+        name:
+          type: string
+          required: false
+          size: 256
+  - type: createTable
+    schema:
+      name: Role
+      fields:
+        name:
+          type: string
+          required: false
+          size: 256
+  - type: createTable
+    schema:
+      name: UserRole
+      fields:
+        userAuthValue:
+          type: string
+          required: false
+          size: 256

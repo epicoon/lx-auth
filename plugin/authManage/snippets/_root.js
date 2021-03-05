@@ -1,12 +1,7 @@
 /**
  * @var lx.Plugin Plugin
  * @var lx.Snippet Snippet
- * */
-
-/**
- * const userRoleEventHandlers Object;
  */
-#lx:require eventHandlers/;
 
 #lx:use lx.MultiBox;
 
@@ -20,20 +15,24 @@ body.begin();
 		marks: ['Rights and roles', 'Users']
 	});
 
-	var boxRights = mbox.sheet(0).add(lx.Box, {geom:['10px', '10px', null, null, '10px', '10px']});
+	var boxRights = mbox.sheet(0).add(lx.Box, {margin:'10px'});
 	boxRights.setPlugin({
-		name: 'lx/model:relationManager',
+		name: 'lx/modelnew:relationManager',
 		attributes: {
-			models: ['lx/auth.AuthRight', 'lx/auth.AuthRole']
+			model: 'lx/auth.Role',
+			relation: 'rights'
 		}
 	});
 
-	var boxUsers = mbox.sheet(1).add(lx.Box, {geom:['10px', '10px', null, null, '10px', '10px']});
+	var boxUsers = mbox.sheet(1).add(lx.Box, {margin:'10px'});
 	boxUsers.setPlugin({
-		name: 'lx/model:relationManager',
+		name: 'lx/modelnew:relationManager',
 		attributes: {
-			models: [Plugin.attributes.userModel, 'lx/auth.AuthRole'],
-			eventHandlers: userRoleEventHandlers
+			userModel: Plugin.attributes.userModel,
+			respondentName: 'UserRole',
+			getRespondentPlugin: function(core) {
+				return core.plugin.parent;
+			}
 		}
 	});
 body.end();

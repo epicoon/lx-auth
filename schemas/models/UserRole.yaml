@@ -1,0 +1,7 @@
+name: UserRole
+
+fields:
+  userAuthValue: string
+
+relations:
+  roles: (><) Role.userRoles

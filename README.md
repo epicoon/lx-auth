@@ -6,8 +6,8 @@ Set components in main application configuration:
 
 ```php
 'components' => [
-	'userProcessor' => [
-		'class' => lx\auth\UserProcessor::class,
+	'userManager' => [
+		'class' => lx\auth\UserManager::class,
 		
 		// user model: usertest - service name, User - model name
 		'userModel' => 'usertest.User',

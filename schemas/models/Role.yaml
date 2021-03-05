@@ -1,0 +1,8 @@
+name: Role
+
+fields:
+  name: string
+
+relations:
+  rights: (><) Right.roles
+  userRoles: (><) UserRole.roles

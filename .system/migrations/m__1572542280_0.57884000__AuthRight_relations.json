@@ -1,1 +1,0 @@
-{"type":"relations","model":"AuthRight","actions":[{"action":"add_relation","name":"roles","type":3,"rel_model":"AuthRole"}]}

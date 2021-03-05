@@ -1,1 +1,0 @@
-{"type":"new_table","model":"AuthRole","schema":{"fields":{"name":{"type":"string"}},"relations":{"rights":"AuthRight[]","userRoles":"AuthUserRole[]"}}}

@@ -1,1 +1,0 @@
-{"type":"new_table","model":"AuthDefaultList","schema":{"fields":{"type":{"type":"string"},"id_item":{"type":"int"}}}}

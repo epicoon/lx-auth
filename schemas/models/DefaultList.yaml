@@ -1,0 +1,5 @@
+name: DefaultList
+
+fields:
+  type: string
+  value: string

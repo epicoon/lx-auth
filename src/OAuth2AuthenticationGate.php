@@ -3,6 +3,8 @@
 namespace lx\auth;
 
 use lx\ApplicationToolTrait;
+use lx\auth\models\AccessToken;
+use lx\auth\models\RefreshToken;
 use lx\ClassOfServiceInterface;
 use lx\AuthenticationInterface;
 use lx\EventListenerTrait;
@@ -12,6 +14,8 @@ use lx\ModelInterface;
 use lx\ObjectTrait;
 use lx\ResourceContext;
 use lx\UserEventsEnum;
+use lx\UserInterface;
+use lx\UserManagerInterface;
 
 /**
  * Class OAuth2AuthenticationGate
@@ -51,7 +55,7 @@ class OAuth2AuthenticationGate implements AuthenticationInterface, FusionCompone
 	 *        'name' => 'modelName'
 	 * ]
 	 * */
-	public function __construct($config = [])
+	public function __construct(array $config = [])
 	{
         $this->__objectConstruct($config);
 
@@ -77,9 +81,9 @@ class OAuth2AuthenticationGate implements AuthenticationInterface, FusionCompone
 	}
 
 
-	/**************************************************************************************************************************
-	 * INTERFACE lx\AuthenticationInterface
-	 *************************************************************************************************************************/
+    /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+     * INTERFACE lx\AuthenticationInterface
+     * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	/**
 	 * Попытка аутентифицировать пользователя:
@@ -90,45 +94,31 @@ class OAuth2AuthenticationGate implements AuthenticationInterface, FusionCompone
 	 * - По полю логина модели ищем модель пользователя
 	 * - Если модель пользователя не найдена - компонент "пользователь" остается гостем
 	 * */
-	public function authenticateUser()
+    public function authenticateUser(?array $authData = null): ?UserInterface
 	{
-		if (!$this->app->user->isAvailable()) {
-			$this->authProblem = self::AUTH_PROBLEM_USER_COMPONENT_IS_UNAVAILABLE;
-			return false;
-		}
+	    if ($authData !== null) {
+            $accessToken = $authData['accessToken'] ?? null;
+            if ($accessToken) {
+                $accessToken = preg_replace('/^Bearer /', '', $accessToken);
+                return $this->authenticateUserByAccessToken($accessToken);
+            }
 
-		$accessToken = $this->retrieveToken();
-		if (!$accessToken) {
-			$this->authProblem = self::AUTH_PROBLEM_TOKEN_NOT_RETRIEVED;
-			return false;
-		}
+            $refreshToken = $authData['refreshToken'] ?? null;
+            if ($refreshToken) {
+                $refreshToken = preg_replace('/^Bearer /', '', $refreshToken);
+                return $this->authenticateUserByRefreshToken($refreshToken);
+            }
 
-		$accessTokenManager = $this->getModelManager('AccessToken');
-		$accessTokenModel = $accessTokenManager->loadModel(['token' => $accessToken]);
-		if (!$accessTokenModel) {
-            \lx::devLog(['_'=>[__FILE__,__CLASS__,__METHOD__,__LINE__],
-                '__trace__' => debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT&DEBUG_BACKTRACE_IGNORE_ARGS),
-                'msg' => "Access token '$accessToken' not found",
-            ]);
+            return null;
+        }
 
-			$this->authProblem = self::AUTH_PROBLEM_TOKEN_NOT_FOUND;
-			return false;
-		}
+        $accessToken = $this->retrieveToken();
+        if (!$accessToken) {
+            $this->authProblem = self::AUTH_PROBLEM_TOKEN_NOT_RETRIEVED;
+            return null;
+        }
 
-		$now = (new \DateTime())->format('Y-m-d H:i:s');
-		$expire = (new \DateTime($accessTokenModel->expire))->format('Y-m-d H:i:s');
-		if ($expire <= $now) {
-			$this->authProblem = self::AUTH_PROBLEM_TOKEN_EXPIRED;
-			return false;
-		}
-
-		$appUserSuccess = $this->app->userProcessor->setApplicationUser($accessTokenModel->user_login);
-		if ($appUserSuccess) {
-			return true;
-		} else {
-			$this->authProblem = self::AUTH_PROBLEM_USER_NOT_FOUND;
-			return false;
-		}
+        return $this->authenticateUserByAccessToken($accessToken, $this->app->user);
 	}
 
 	/**
@@ -174,38 +164,25 @@ class OAuth2AuthenticationGate implements AuthenticationInterface, FusionCompone
     }
 
 
-	/**************************************************************************************************************************
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 	 * PUBLIC
-	 *************************************************************************************************************************/
+	 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-    /**
-     * @param string $accessToken
-     * @return ModelInterface|null
-     */
-	public function getUserModelByAccessToken($accessToken)
+    public function isTokenNotFound()
     {
-        $accessToken = preg_replace('/^Bearer /', '', $accessToken);
-
-        $accessTokenManager = $this->getModelManager('AccessToken');
-        $accessTokenModel = $accessTokenManager->loadModel(['token' => $accessToken]);
-        if (!$accessTokenModel) {
-
-            return null;
-        }
-
-        return $this->app->userProcessor->getUserModel($accessTokenModel->user_login);
+        return $this->authProblem == self::AUTH_PROBLEM_TOKEN_NOT_FOUND;
     }
 
-    public function tokenIsExpired()
+    public function isTokenExpired()
     {
         return $this->authProblem == self::AUTH_PROBLEM_TOKEN_EXPIRED;
     }
-
-	public function updateAccessTokenForUser($user)
+    
+    public function updateAccessTokenForUser($user)
 	{
 		return $this->updateTokenForUser(
 			$user,
-			$this->getModelManager('AccessToken'),
+			AccessToken::class,
 			$this->getAccessTokenLifetime()
 		);
 	}
@@ -214,37 +191,43 @@ class OAuth2AuthenticationGate implements AuthenticationInterface, FusionCompone
 	{
 		return $this->updateTokenForUser(
 			$user,
-			$this->getModelManager('RefreshToken'),
+			RefreshToken::class,
 			$this->getRefreshTokenLifetime()
 		);
 	}
 
+    /**
+     * @param string $refreshToken
+     * @return array|null
+     * @throws \Exception
+     */
 	public function refreshTokens($refreshToken)
 	{
 		$arr = explode(' ', $refreshToken);
 		if ($arr[0] != 'Bearer') {
-			return false;
+			return null;
 		} else {
 			$refreshToken = $arr[1];
 		}
 
-		$refreshTokenManager = $this->getModelManager('RefreshToken');
-		$refreshTokenModel = $refreshTokenManager->loadModel(['token' => $refreshToken]);
+        $refreshTokenModel = RefreshToken::findOne(['token' => $refreshToken]);
 		if (!$refreshTokenModel) {
-			return false;
+			return null;
 		}
-
+		
 		$now = (new \DateTime())->format('Y-m-d H:i:s');
 		$expire = (new \DateTime($refreshTokenModel->expire))->format('Y-m-d H:i:s');
 		if ($expire <= $now) {
 			$this->authProblem = self::AUTH_PROBLEM_TOKEN_EXPIRED;
-			return false;
+			return null;
 		}
 
-		$user = $this->app->userProcessor->getUser($refreshTokenModel->user_login);
+		/** @var UserManagerInterface $userManager */
+		$userManager = $this->app->userManager;
+		$user = $userManager->identifyUserByAuthValue($refreshTokenModel->userAuthValue);
 		if (!$user) {
 			$this->authProblem = self::AUTH_PROBLEM_USER_NOT_FOUND;
-			return false;
+			return null;
 		}
 
 		return [
@@ -253,38 +236,34 @@ class OAuth2AuthenticationGate implements AuthenticationInterface, FusionCompone
 		];
 	}
 
-	public function logOut($user = null)
+	public function logOut(?UserInterface $user = null)
 	{
 		if ($user === null) {
 			$user = $this->app->user;
-			if ($user->isGuest()) {
-				return;
-			}
 		}
 
-		$time = new \DateTime();
-		$time->modify('-5 minutes');
-		$time = $time->format('Y-m-d H:i:s');
+        if ($user->isGuest()) {
+            return;
+        }
 
-		$manager = $this->getModelManager('RefreshToken');
-		$token = $manager->loadModel(['user_login' => $user->getAuthField()]);
-		if ($token) {
-			$token->expire = $time;
-			$token->save();
-		}
+		$time = (new \DateTime())->modify('-5 minutes')->format('Y-m-d H:i:s');
 
-		$manager = $this->getModelManager('AccessToken');
-		$token = $manager->loadModel(['user_login' => $user->getAuthField()]);
-		if ($token) {
-			$token->expire = $time;
-			$token->save();
-		}
+        $accessToken = AccessToken::findOne(['userAuthValue' => $user->getAuthValue()]);
+        $accessToken->expire = $time;
+
+        $refreshToken = RefreshToken::findOne(['userAuthValue' => $user->getAuthValue()]);
+        $refreshToken->expire = $time;
+
+        $accessToken->getRepository()->hold();
+        $accessToken->save();
+        $refreshToken->save();
+        $accessToken->getRepository()->commit();
 	}
 
 
-	/*******************************************************************************************************************
-	 * PROTECTED
-	 ******************************************************************************************************************/
+    /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+     * PROTECTED
+     * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	/**
 	 * Получить менеджер моделей сервиса для текущего класса
@@ -303,9 +282,61 @@ class OAuth2AuthenticationGate implements AuthenticationInterface, FusionCompone
 	}
 
 
-	/*******************************************************************************************************************
-	 * PRIVATE
-	 ******************************************************************************************************************/
+    /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+     * PRIVATE
+     * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+    private function authenticateUserByAccessToken(string $token, ?UserInterface $defaultUser = null): ?UserInterface
+    {
+        return $this->authenticateUserByToken(AccessToken::class, $token, $defaultUser);
+    }
+
+    private function authenticateUserByRefreshToken(string $token, ?UserInterface $defaultUser = null): ?UserInterface
+    {
+        return $this->authenticateUserByToken(RefreshToken::class, $token, $defaultUser);
+    }
+
+    /**
+     * @param string&AccessToken&RefreshToken $tokenClass
+     * @param string $token
+     * @param UserInterface|null $defaultUser
+     * @return UserInterface|null
+     * @throws \Exception
+     */
+    private function authenticateUserByToken(
+        string $tokenClass,
+        string $token,
+        ?UserInterface $defaultUser = null
+    ): ?UserInterface
+    {
+        $tokenModel = $tokenClass::findOne(['token' => $token]);
+        if (!$tokenModel) {
+            \lx::devLog(['_'=>[__FILE__,__CLASS__,__METHOD__,__LINE__],
+                '__trace__' => debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT&DEBUG_BACKTRACE_IGNORE_ARGS),
+                'msg' => "Auth token '$token' not found",
+            ]);
+
+            $this->authProblem = self::AUTH_PROBLEM_TOKEN_NOT_FOUND;
+            return null;
+        }
+
+        $now = (new \DateTime())->format('Y-m-d H:i:s');
+        $expire = (new \DateTime($tokenModel->expire))->format('Y-m-d H:i:s');
+        if ($expire <= $now) {
+            $this->authProblem = self::AUTH_PROBLEM_TOKEN_EXPIRED;
+            return null;
+        }
+
+        /** @var UserManagerInterface $userManager */
+        $userManager = $this->app->userManager;
+        $user = $userManager->identifyUserByAuthValue($tokenModel->userAuthValue, $defaultUser);
+        if (!$user) {
+            $this->authProblem = self::AUTH_PROBLEM_USER_NOT_FOUND;
+            return null;
+        }
+
+        return $user;
+    }
 
 	/**
 	 * Ищем в данных запроса токен доступа
@@ -343,20 +374,30 @@ class OAuth2AuthenticationGate implements AuthenticationInterface, FusionCompone
 		return $token;
 	}
 
-	private function updateTokenForUser($user, $manager, $lifetime)
+    /**
+     * @param UserInterface $user
+     * @param string&AccessToken&RefreshToken $tokenClass
+     * @param int $lifetime
+     * @return AccessToken|RefreshToken
+     */
+	private function updateTokenForUser($user, $tokenClass, $lifetime)
 	{
-		$token = $manager->loadModel(['user_login' => $user->getAuthField()]);
-		if (!$token) {
-			$token = $manager->newModel();
-			$token->user_login = $user->getAuthField();
-		}
+	    /** @var AccessToken|RefreshToken $token */
+	    $token = $tokenClass::findOne([
+	        'userAuthValue' => $user->getAuthValue(),
+        ]);
+        if (!$token) {
+            $token = new $tokenClass([
+                'userAuthValue' => $user->getAuthValue(),
+            ]);
+        }
 
-		$token->token = $this->genTokenForUser($user);
-		$expire = new \DateTime();
-		$expire->modify('+' . $lifetime . ' seconds');
-		$token->expire = $expire->format('Y-m-d H:i:s');
-		$token->save();
-		return $token;
+        $token->token = $this->genTokenForUser($user);
+        $expire = new \DateTime();
+        $expire->modify('+' . $lifetime . ' seconds');
+        $token->expire = $expire->format('Y-m-d H:i:s');
+        $token->save();
+        return $token;
 	}
 
 	private function getAccessTokenLifetime()
@@ -369,32 +410,31 @@ class OAuth2AuthenticationGate implements AuthenticationInterface, FusionCompone
 		return $this->refreshTokenLifetime;
 	}
 
+    /**
+     * @param UserInterface&ModelInterface $user
+     * @return string
+     */
 	private function genTokenForUser($user)
 	{
 		if ($this->tokenGenerator) {
 			return $this->tokenGenerator->generate();
 		} else {
-			return md5('' . $user->id . time() . rand(0, PHP_INT_MAX));
+			return md5('' . $user->getId() . time() . rand(0, PHP_INT_MAX));
 		}
 	}
 
 
-	/*******************************************************************************************************************
-	 * EVENT HANDLERS
-	 ******************************************************************************************************************/
+    /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+     * EVENT HANDLERS
+     * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+    /**
+     * @param UserInterface $user
+     */
 	private function onUserDelete($user)
 	{
-		$authValue = $user->getAuthField();
-
-		$manager = $this->getModelManager('RefreshToken');
-		$manager->deleteModelsByCondition([
-			'user_login' => $authValue
-		]);
-
-		$manager = $this->getModelManager('AccessToken');
-		$manager->deleteModelsByCondition([
-			'user_login' => $authValue
-		]);
+		$userAuthValue = $user->getAuthValue();
+		RefreshToken::deleteAll(['userAuthValue' => $userAuthValue]);
+        AccessToken::deleteAll(['userAuthValue' => $userAuthValue]);
 	}
 }

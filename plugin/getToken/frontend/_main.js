@@ -48,6 +48,9 @@ function checkResultProblems(res) {
 		case 403:
 			lx.Tost.warning('Resource is unavailable');
 			break;
+		case 404:
+			lx.Tost.warning('User not found');
+			break;
 		default: lx.Tost.error(res.error_details || 'Internal server error');
 	}
 }

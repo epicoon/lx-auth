@@ -5,9 +5,10 @@ autoload:
     lx\auth\:
       - ''
       - src
+    lx\auth\sys\: '.system'
 
 service:
   class: lx\auth\Service
 
   plugins: plugin
-  models: model
+#  models: model

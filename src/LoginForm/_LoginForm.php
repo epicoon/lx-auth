@@ -2,8 +2,10 @@
 
 namespace lx\auth;
 
+use lx\AuthenticationInterface;
 use lx\Rect;
 use lx\ResponseCodeEnum;
+use lx\UserManagerInterface;
 
 /**
  * Форма логина
@@ -12,17 +14,18 @@ class LoginForm extends Rect
 {
 	public function login($login, $password)
     {
-		$processor = $this->app->userProcessor;
+        /** @var UserManagerInterface $userManager */
+		$userManager = $this->app->userManager;
 
-		$user = $processor->findUserByPassword($login, $password);
-		if ( ! $user) {
-
+		$user = $userManager->identifyUserByPassword($login, $password);
+		if (!$user) {
 		    return $this->prepareErrorResponse(
 		        'User not found',
                 ResponseCodeEnum::NOT_FOUND,
             );
 		}
 
+        /** @var AuthenticationInterface $gate */
 		$gate = $this->app->authenticationGate;
 		$accessTokenModel = $gate->updateAccessTokenForUser($user);
 		$refreshTokenModel = $gate->updateRefreshTokenForUser($user);
@@ -35,22 +38,23 @@ class LoginForm extends Rect
 
 	public function register($login, $password)
     {
-		$processor = $this->app->userProcessor;
-		if ( ! $processor) {
+        /** @var UserManagerInterface $userManager */
+		$userManager = $this->app->userManager;
+		if ( ! $userManager) {
             \lx::devLog(['_'=>[__FILE__,__CLASS__,__METHOD__,__LINE__],
                 '__trace__' => debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT&DEBUG_BACKTRACE_IGNORE_ARGS),
-                'msg' => 'User processor does not exist',
+                'msg' => 'User manager does not exist',
             ]);
 
             return $this->prepareErrorResponse('Internal server error');
 		}
 
-		$user = $processor->createUser($login, $password);
-		if ( ! $user) {
-
+		$user = $userManager->createUser($login, $password);
+		if (!$user) {
 		    return $this->prepareErrorResponse("Login \"$login\" already exists");
 		}
 
+		/** @var AuthenticationInterface $gate */
 		$gate = $this->app->authenticationGate;
 		$accessTokenModel = $gate->updateAccessTokenForUser($user);
 		$refreshTokenModel = $gate->updateRefreshTokenForUser($user);

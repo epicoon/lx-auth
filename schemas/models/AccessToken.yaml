@@ -1,0 +1,6 @@
+name: AccessToken
+
+fields:
+  token: string
+  userAuthValue: string
+  expire: string #timestamp

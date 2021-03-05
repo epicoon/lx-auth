@@ -2,171 +2,197 @@
 
 namespace lx\auth\plugin\authManage\backend;
 
-use lx\model\ModelCollection;
-use lx\model\plugin\relationManager\backend\Respondent;
+use lx;
+use lx\UserManagerInterface;
+use lx\auth\RbacAuthorizationGate;
+use lx\auth\models\Role;
+use lx\auth\models\UserRole;
+use lx\modelnew\modelTools\ModelsSerializer;
+use lx\modelnew\plugins\relationManager\backend\Respondent;
+use lx\modelnew\Model;
 
 class UserRoleRespondent extends Respondent
 {
-	private $roleModelName = 'lx/auth.AuthRole';
-	private $userRoleModelName = 'lx/auth.AuthUserRole';
-
-	public function getBaseInfo($userModelName, $condition0, $condition1, $pages)
+	public function getCoreData(array $attributes): array
 	{
-		$users = $this->loadModels($userModelName, $condition0, $pages[0]['page'], $pages[0]['count']);
-		$roles = $this->loadModels($this->roleModelName, $condition1, $pages[1]['page'], $pages[1]['count']);
+	    $userModelName = $attributes['userModel'];
 
-		list($service, $modelManager0) = $this->getServiceAndManager($userModelName);
-		$usersCount = $modelManager0->getModelsCount();
-		list($service1, $modelManager1) = $this->getServiceAndManager($this->roleModelName);
-		$rolesCount = $modelManager1->getModelsCount();
-
-		$userRoleManager = $this->app->getModelManager($this->userRoleModelName);
-
-		$userRoleList = new ModelCollection();
-		$authFieldName = $this->app->userProcessor->getAuthFieldName();
-		foreach ($users as $user) {
-			$userRole = $userRoleManager->loadModel([
-				'user_auth_data' => $user->{$authFieldName},
-			]);
-			if ($userRole) {
-				$userRoleList[] = $userRole;
-			}
-		}
-
-		$usersMap = $users->mapByField($authFieldName);
-		$userRolesMap = $userRoleList->mapByField('id');
-
-		if ($roles->isEmpty() || $userRoleList->isEmpty()) {
-			$relationsMap = [];
-		} else {
-			$relManager = $service1->modelProvider->getRelationManager($this->userRoleModelName, $this->roleModelName);
-			$relationsMap = $relManager->getRelationsPkMap($userRoleList, $roles);
-			foreach ($relationsMap as &$pare) {
-				$userRole = $userRolesMap[$pare[0]];
-				$user = $usersMap[$userRole->user_auth_data];
-				$pare[0] = $user->id;
-			}
-			unset($pare);
-		}
-
-		$users->setModelName($userModelName);
-		$roles->setModelName($this->roleModelName);
-		return [
-			'users' => $users->toDeepArrayWithSchema(),
-			'roles' => $roles->toDeepArrayWithSchema(),
-			'relations' => $relationsMap,
-			'usersCount' => $usersCount,
-			'rolesCount' => $rolesCount,
-		];
+	    /** @var string&Model $modelClass */
+        $modelClass = Model::getModelClassName($userModelName);
+        return [
+            'serviceName' => $modelClass::getModelService()->name,
+            'modelName' => $modelClass::getStaticModelName(),
+            'relation' => 'roles',
+        ];
 	}
 
-	public function createRelation($modelName0, $pk0, $modelName1, $pk1)
+    public function getRelationData(
+        string $serviceName,
+        string $modelName,
+        string $relationName,
+        array $filters
+    ): array
+    {
+        $modelClass = $this->defineModelClass($serviceName, $modelName);
+        if ($this->hasErrors()) {
+            return [
+                'success' => false,
+                'message' => $this->getFirstError(),
+            ];
+        }
+
+        /**
+         * @var Model[] $users
+         * @var int $usersTotalCount
+         */
+        list($users, $usersTotalCount) = $this
+            ->loadModels($modelClass, $filters[0] ?? []);
+        /**
+         * @var Model[] $roles
+         * @var int $rolesTotalCount
+         */
+        list($roles, $rolesTotalCount) = $this
+            ->loadModels(Role::class, $filters[1] ?? []);
+
+        $serializer = new ModelsSerializer();
+        $fields0 = $modelClass::getSchemaArray()['fields'];
+        //TODO PK!!!
+        $fields0['id'] = ['type' => 'pk'];
+        $usersData = [
+            'schema' => $fields0,
+            'list' => $serializer->collectionToArray($users),
+        ];
+        $fields1 = Role::getSchemaArray()['fields'];
+        //TODO PK!!!
+        $fields1['id'] = ['type' => 'pk'];
+        $rolesData = [
+            'schema' => $fields1,
+            'list' => $serializer->collectionToArray($roles),
+        ];
+
+        /** @var UserManagerInterface $userManager */
+        $userManager = lx::$app->userManager;
+        $authField = $userManager->getAuthFieldName();
+        $usersMap = [];
+        foreach ($users as $user) {
+            $authValue = $user->getField($authField);
+            $usersMap[$authValue] = $user;
+        };
+
+        $relationsMap = [];
+        $userRoles = UserRole::find(['userAuthValue' => array_keys($usersMap)]);
+        /** @var UserRole $userRole */
+        foreach ($userRoles as $userRole) {
+            $list = $userRole->roles;
+            foreach ($list as $role) {
+                $relationsMap[] = [$usersMap[$userRole->userAuthValue]->getId(), $role->getId()];
+            }
+        }
+
+        return [
+            'count0' => $usersTotalCount,
+            'count1' => $rolesTotalCount,
+            'models0' => $usersData,
+            'models1' => $rolesData,
+            'relatedServiceName' => 'lx/auth',
+            'relatedModelName' => 'Role',
+            'relations' => $relationsMap,
+        ];
+    }
+
+    public function createRelation(
+        string $serviceName,
+        string $modelName,
+        int $pk0,
+        string $relationName,
+        int $pk1
+    ): ?array
 	{
-		list(
-			$userModelName,
-			$userPk,
-			$roleModelName,
-			$rolePk
-		) = $this->translateParams($modelName0, $pk0, $modelName1, $pk1);
+	    /** @var UserManagerInterface $userManager */
+	    $userManager = lx::$app->userManager;
+	    $user = $userManager->identifyUserById($pk0);
+	    $role = Role::findOne($pk1);
 
-		list($service0, $userManager) = $this->getServiceAndManager($userModelName);
-		list($service1, $roleManager) = $this->getServiceAndManager($this->roleModelName);
-		$userRoleManager = $this->app->getModelManager($this->userRoleModelName);
+	    /** @var RbacAuthorizationGate $gate */
+	    $gate = lx::$app->authorizationGate;
+	    $gate->setUserRoles($user, [$role]);
 
-		$user = $userManager->loadModel($userPk);
-		$role = $roleManager->loadModel($rolePk);
-
-		$authFieldName = $this->app->userProcessor->getAuthFieldName();
-		$userRole = $userRoleManager->loadModel([
-			'user_auth_data' => $user->{$authFieldName},
-		]);
-		if ( ! $userRole) {
-			$userRole = $userRoleManager->newModel();
-			$userRole->user_auth_data = $user->{$authFieldName};
-			$userRole->save();
-		}
-
-		$userRole->roles->add($role);
+	    return null;
 	}
 
-	public function deleteRelation($modelName0, $pk0, $modelName1, $pk1)
+	public function deleteRelation(
+        string $serviceName,
+        string $modelName,
+        int $pk0,
+        string $relationName,
+        int $pk1
+    ): ?array
 	{
-		list(
-			$userModelName,
-			$userPk,
-			$roleModelName,
-			$rolePk
-		) = $this->translateParams($modelName0, $pk0, $modelName1, $pk1);
+        /** @var UserManagerInterface $userManager */
+        $userManager = lx::$app->userManager;
+        $user = $userManager->identifyUserById($pk0);
+        $role = Role::findOne($pk1);
 
-		list($service0, $userManager) = $this->getServiceAndManager($userModelName);
-		list($service1, $roleManager) = $this->getServiceAndManager($this->roleModelName);
-		$userRoleManager = $this->app->getModelManager($this->userRoleModelName);
+        /** @var RbacAuthorizationGate $gate */
+        $gate = lx::$app->authorizationGate;
+        $gate->unsetUserRoles($user, [$role]);
 
-		$user = $userManager->loadModel($userPk);
-		$role = $roleManager->loadModel($rolePk);
-
-		$authFieldName = $this->app->userProcessor->getAuthFieldName();
-		$userRole = $userRoleManager->loadModel([
-			'user_auth_data' => $user->{$authFieldName},
-		]);
-
-		$userRole->roles->remove($role);
+        return null;
 	}
 
-	public function createModel($modelName, $fields)
+    public function createModel(string $serviceName, string $modelName, array $fields): ?array
 	{
-		if ($modelName == $this->roleModelName) {
-			parent::createModel($modelName, $fields);
-			return;
+        $modelClass = $this->defineModelClass($serviceName, $modelName);
+		if ($modelClass == Role::class) {
+			return parent::createModel($serviceName, $modelName, $fields);
 		}
 
-		$processor = $this->app->userProcessor;
-		$authFieldName = $processor->getAuthFieldName();
-		$passFieldName = $processor->getPasswordFieldName();
+		/** @var UserManagerInterface $userManager */
+		$userManager = $this->app->userManager;
+		$authFieldName = $userManager->getAuthFieldName();
+		$passFieldName = $userManager->getPasswordFieldName();
 		$auth = $fields[$authFieldName] ?? null;
 		$pass = $fields[$passFieldName] ?? '';
+
+		if (!$auth) {
+            return [
+                'success' => false,
+                'message' => "User field $authFieldName is required",
+            ];
+		}
+
+        unset($fields[$authFieldName]);
 		unset($fields[$passFieldName]);
 
-		if ( ! $auth) {
-			return false;
+		$user = $userManager->createUser($auth, $pass, $fields);
+		if (!$user) {
+            return [
+                'success' => false,
+                'message' => "User with this $authFieldName aready exists",
+            ];
 		}
 
-		$user = $processor->createUser($auth, $pass);
-		if ( ! $user) {
-			return false;
-		}
-
-		$user->setFields($fields);
-		$user->save();
+		return null;
 	}
 
-	public function deleteModel($modelName, $pk)
+    public function deleteModel(string $serviceName, string $modelName, int $pk): ?array
 	{
-		if ($modelName == $this->roleModelName) {
-			parent::deleteModel($modelName, $fields);
-			return;
-		}
+        $modelClass = $this->defineModelClass($serviceName, $modelName);
+        if ($modelClass == Role::class) {
+            return parent::deleteModel($serviceName, $modelName, $pk);
+        }
 
-		list($service0, $userManager) = $this->getServiceAndManager($modelName);
-		$user = $userManager->loadModel($pk);
+        /** @var UserManagerInterface $userManager */
+        $userManager = $this->app->userManager;
+        $user = $userManager->identifyUserById($pk);
+        if (!$user) {
+            return [
+                'success' => false,
+                'message' => 'User not found',
+            ];
+        }
 
-		$processor = $this->app->userProcessor;
-		$authFieldName = $processor->getAuthFieldName();
-		$auth = $user->{$authFieldName};
-
-		$processor->deleteUser($auth);
-	}
-
-	private function translateParams($modelName0, $pk0, $modelName1, $pk1)
-	{
-		if ($modelName0 == $this->roleModelName) {
-			return [
-				$modelName1, $pk1, $modelName0, $pk0
-			];
-		}
-
-		return [
-			$modelName0, $pk0, $modelName1, $pk1
-		];
+        $userManager->deleteUser($user->getAuthValue());
+        return null;
 	}
 }

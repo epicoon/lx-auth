@@ -1,1 +1,0 @@
-{"type":"content_table","model":"AuthDefaultList","schema":{"fields":{"type":{"type":"string"},"id_item":{"type":"int"}}},"actions":[["add",[{"type":"new-user-role","id_item":"1","id":1}]]]}

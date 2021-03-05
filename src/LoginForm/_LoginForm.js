@@ -45,18 +45,24 @@ class LoginForm extends lx.Box #lx:namespace lx.auth {
 		super.postBuild(config);
 
 		this->send.click(()=>{
-			^self::login(this->login.value(), this->password.value()).then((res)=>{
+			^self::login(this->login.value(), this->password.value()).then(res=>{
 				if (res.success === false) {
 					lx.Tost.warning(res.error_details[0]);
 					return;
 				}
 
 				__applyTokens(res.token, res.refreshToken);
+			}).catch(res=>{
+				switch (res.error_code) {
+					case 404:
+						lx.Tost.warning('User not found');
+						break;
+				}
 			});
 		});
 
 		this->register.click(()=>{
-			^self::register(this->login.value(), this->password.value()).then((res)=>{
+			^self::register(this->login.value(), this->password.value()).then(res=>{
 				if (res.success === false) {
 					lx.Tost.warning(res.error_details[0]);
 					return;

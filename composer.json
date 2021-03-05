@@ -11,12 +11,17 @@
         }
     ],
     "require":{
-        "lx/core":"dev-master"
+        "lx/core":"dev-master",
+        "lx/model":"dev-master"
     },
     "repositories":[
         {
             "type":"git",
             "url":"https://github.com/epicoon/lx-core"
+        },
+        {
+            "type":"git",
+            "url":"https://github.com/epicoon/lx-model"
         }
-    ]    
+    ]
 }

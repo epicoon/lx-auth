@@ -1,0 +1,7 @@
+name: Right
+
+fields:
+  name: string
+
+relations:
+  roles: (><) Role.rights

@@ -6,8 +6,8 @@
 
 ```php
 'components' => [
-	'userProcessor' => [
-		'class' => lx\auth\UserProcessor::class,
+	'userManager' => [
+		'class' => lx\auth\UserManager::class,
 		
 		// модель юзера: usertest - название сервиса, User - название самой модели
 		'userModel' => 'usertest.User',

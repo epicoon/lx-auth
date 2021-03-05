@@ -1,0 +1,17 @@
+modelChanges:
+  - modelName: Right
+    actions:
+      - type: addRelation
+        relationName: roles
+        definition:
+          type: manyToMany
+          relModel: Role
+          relAttribute: rights
+  - modelName: Role
+    actions:
+      - type: addRelation
+        relationName: userRoles
+        definition:
+          type: manyToMany
+          relModel: UserRole
+          relAttribute: roles

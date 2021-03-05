@@ -1,0 +1,33 @@
+actions:
+  - type: addModels
+    list:
+      - $roleSuperAdmin: Role
+        name: superadmin
+      - $: Right
+        name: superadmin_r
+        roles: [$roleSuperAdmin]
+      - $: Right
+        name: superadmin_w
+        roles: [$roleSuperAdmin]
+
+      - $roleAdmin: Role
+        name: admin
+      - $: Right
+        name: admin_r
+        roles: [$roleAdmin]
+      - $: Right
+        name: admin_w
+        roles: [$roleAdmin]
+
+      - $roleClient: Role
+        name: client
+      - $: Right
+        name: client_r
+        roles: [$roleClient]
+      - $: Right
+        name: client_w
+        roles: [$roleClient]
+
+      - $: DefaultList
+        type: new-user-role
+        value: '<?=$roleClient->name?>'

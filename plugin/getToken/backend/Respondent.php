@@ -13,39 +13,35 @@ class Respondent extends \lx\Respondent
 	    /** @var AuthenticationInterface $gate */
 		$gate = $this->app->authenticationGate;
 		if ($gate->authenticateUser()) {
-
 		    return $this->prepareResponse(
-		        $this->app->userProcessor->getPublicData()
+		        $this->app->userManager->getPublicData()
             );
 		}
 
-		if ($gate->tokenIsExpired()) {
-
+		if ($gate->isTokenExpired()) {
 		    return $this->prepareErrorResponse('expired', ResponseCodeEnum::UNAUTHORIZED);
 		}
 		
-		if ($gate->getProblemCode() == OAuth2AuthenticationGate::AUTH_PROBLEM_TOKEN_NOT_FOUND) {
-
+		if ($gate->isTokenNotFound()) {
             return $this->prepareErrorResponse('token not found', ResponseCodeEnum::UNAUTHORIZED);
         }
 
-		return $this->prepareErrorResponse('Internal server error');
+		return $this->prepareErrorResponse('Internal server error', ResponseCodeEnum::SERVER_ERROR);
 	}
 	
 	public function refreshTokens($refreshToken)
 	{
+        /** @var AuthenticationInterface $gate */
 		$gate = $this->app->authenticationGate;
 
 		$pare = $gate->refreshTokens($refreshToken);
-		if ($pare === false) {
-		    if ($gate->tokenIsExpired()) {
-
+		if ($pare === null) {
+		    if ($gate->isTokenExpired()) {
 		        return $this->prepareErrorResponse(
                     'Resource is unavailable',
                     ResponseCodeEnum::UNAUTHORIZED
                 );
             } else {
-
 		        return $this->prepareErrorResponse(
                     'Resource is unavailable',
                     ResponseCodeEnum::FORBIDDEN

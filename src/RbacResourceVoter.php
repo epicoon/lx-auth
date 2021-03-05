@@ -3,17 +3,15 @@
 namespace lx\auth;
 
 use lx\AbstractResourceVoter;
-use lx\User;
+use lx\UserInterface;
 
+/**
+ * Class RbacResourceVoter
+ * @package lx\auth
+ */
 class RbacResourceVoter extends AbstractResourceVoter
 {
-	/**
-	 * @param User $user
-	 * @param string $actionName
-	 * @param array $params
-	 * @return bool
-	 */
-	public function run(User $user, $actionName, $params)
+	public function run(UserInterface $user, string $actionName, array $params): bool
 	{
 		$authGate = $this->app->authorizationGate;
 		if (!$authGate) {
@@ -21,14 +19,14 @@ class RbacResourceVoter extends AbstractResourceVoter
         }
 
 		$rights = $this->getActionRights($actionName);
+		if (empty($rights)) {
+		    return true;
+        }
+
 		return $authGate->checkUserAccess($user, new ResourceAccessData($rights));
 	}
 
-    /**
-     * @param string $actionName
-     * @return array
-     */
-    private function getActionRights($actionName)
+    private function getActionRights(string $actionName): array
     {
         $map = $this->actionRightsMap();
 
@@ -39,10 +37,7 @@ class RbacResourceVoter extends AbstractResourceVoter
         return [];
     }
 
-    /**
-     * @return array
-     */
-    private function actionRightsMap()
+    private function actionRightsMap(): array
     {
         if ($this->getResource() instanceof RbacResourceInterface) {
             return $this->getResource()->getPermissions();

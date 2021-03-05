@@ -1,0 +1,6 @@
+name: RefreshToken
+
+fields:
+  token: string
+  userAuthValue: string
+  expire: string #timestamp

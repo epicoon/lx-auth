@@ -1,4 +1,0 @@
-AuthDefaultList:
-  fields:
-    type: {type: string}
-    id_item: {type: int}

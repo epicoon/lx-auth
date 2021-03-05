@@ -1,1 +1,0 @@
-{"type":"content_table","model":"AuthRole","schema":{"fields":{"name":{"type":"string"}},"relations":{"rights":"><AuthRight","userRoles":"><AuthUserRole"}},"actions":[["add",[{"name":"client","id":1},{"name":"admin","id":2},{"name":"superadmin","id":3}]]]}

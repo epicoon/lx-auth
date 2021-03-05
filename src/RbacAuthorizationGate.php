@@ -3,6 +3,11 @@
 namespace lx\auth;
 
 use lx\ApplicationToolTrait;
+use lx\ArrayHelper;
+use lx\auth\models\DefaultList;
+use lx\auth\models\Right;
+use lx\auth\models\Role;
+use lx\auth\models\UserRole;
 use lx\AuthorizationInterface;
 use lx\EventListenerInterface;
 use lx\EventListenerTrait;
@@ -10,8 +15,8 @@ use lx\FusionComponentInterface;
 use lx\FusionComponentTrait;
 use lx\ObjectTrait;
 use lx\ResourceContext;
-use lx\User;
 use lx\UserEventsEnum;
+use lx\UserInterface;
 
 class RbacAuthorizationGate implements AuthorizationInterface, FusionComponentInterface
 {
@@ -36,11 +41,11 @@ class RbacAuthorizationGate implements AuthorizationInterface, FusionComponentIn
 		$userRights = $this->getUserRights($user);
 		$resourceRigths = $accessData->getData();
 		foreach ($resourceRigths as $right) {
-			if ( ! in_array($right, $userRights)) {
+			if (!in_array($right, $userRights)) {
 				return false;
 			}
 		}
-
+		
 		return true;
 	}
 
@@ -54,68 +59,102 @@ class RbacAuthorizationGate implements AuthorizationInterface, FusionComponentIn
 		return $this->app->getPlugin($this->rbacManagePluginName);
 	}
 
-	protected function getModelManager($modelName) {
-		$service = $this->getService();
-		if (!$service) {
-			return null;
-		}
+    /**
+     * @param UserInterface $user
+     * @param Role[] $roles
+     */
+	public function setUserRoles(UserInterface $user, iterable $roles)
+    {
+        $userRole = UserRole::findOne(['userAuthValue' => $user->getAuthValue()]);
+        if (!$userRole) {
+            $userRole = new UserRole([
+                'userAuthValue' => $user->getAuthValue(),
+            ]);
+        }
 
-		return $service->getModelManager($modelName);
-	}
+        foreach ($roles as $role) {
+            $userRole->roles[] = $role;
+        }
 
+        $userRole->save();
+    }
+
+    /**
+     * @param UserInterface $user
+     * @param Role[] $roles
+     */
+    public function unsetUserRoles(UserInterface $user, iterable $roles)
+    {
+        $userRole = UserRole::findOne(['userAuthValue' => $user->getAuthValue()]);
+        if (!$userRole) {
+            return;
+        }
+
+        foreach ($roles as $role) {
+            $userRole->removeRelated('roles', $role);
+        }
+
+        $userRole->save();
+    }
+	
 	/**
-	 * @param User $user
-	 * @return mixed
+	 * @param UserInterface $user
+	 * @return array
 	 */
-	private function getUserRights($user)
+	private function getUserRights($user): array
 	{
-		$result = [];
 		$roles = $this->getUserRoles($user);
-		if ( ! $roles) {
-			return $result;
+		if (ArrayHelper::isEmpty($roles)) {
+			return [];
 		}
 
-		$rights = $roles->getField('rights');
-		foreach ($rights as $rightList) {
-			foreach ($rightList->get() as $right) {
-				$rightName = $right->name;
-				if (array_search($rightName, $result) === false) {
-					$result[] = $rightName;
-				}
-			}
-		}
+		$rights = [];
+		foreach ($roles as $role) {
+		    $rights = ArrayHelper::merge($rights, $role->rights);
+        }
+
+		$result = [];
+		/** @var Right $right */
+        foreach ($rights as $right) {
+		    $result[] = $right->name;
+        }
 
 		return $result;
 	}
 
-	private function getUserRoles($user)
+    /**
+     * @param UserInterface $user
+     * @return iterable|Role[]
+     */
+	private function getUserRoles(UserInterface $user): iterable
 	{
 		if ($user->isGuest()) {
-			return null;
+			return [];
 		}
 
-		$userRoleManager = $this->getModelManager('AuthUserRole');
-		$userRoleModel = $userRoleManager->loadModel([
-			'user_auth_data' => $user->getAuthField()
-		]);
-		if ( ! $userRoleModel) {
-			return null;
-		}
+		$userRole = UserRole::findOne(['userAuthValue' => $user->getAuthValue()]);
+		if (!$userRole) {
+		    return [];
+        }
 
-		return $userRoleModel->roles->get();
+		return $userRole->roles;
 	}
 
 	private function getNewUserRoles()
 	{
-		$defaultListManager = $this->getModelManager('AuthDefaultList');
-		$models = $defaultListManager->loadModels(['type' => 'new-user-role']);
-		if ($models->isEmpty()) {
-			return $models;
-		}
-
-		$roleManager = $this->getModelManager('AuthRole');
-		$roles = $roleManager->loadModels($models->getField('id_item'));
-		return $roles;
+	    /** @var DefaultList[] $defaults */
+	    $defaults = DefaultList::find([
+	        //TODO ~const?
+            'type' => 'new-user-role'
+        ]);
+        $roleNames = [];
+        foreach ($defaults as $default) {
+            $roleNames[] = $default->value;
+        }
+        $roles = Role::find([
+            'name' => $roleNames,
+        ]);
+        return $roles;
 	}
 
 
@@ -123,26 +162,23 @@ class RbacAuthorizationGate implements AuthorizationInterface, FusionComponentIn
 	 * EVENT HANDLERS
 	 ******************************************************************************************************************/
 
+    /**
+     * @param UserInterface $user
+     */
 	private function onNewUser($user)
 	{
-		$userRoleManager = $this->getModelManager('AuthUserRole');
-		$userRole = $userRoleManager->newModel();
-		$userRole->user_auth_data = $user->getAuthField();
-		$userRole->save();
-
-		$roles = $this->getNewUserRoles();
-		$userRole->roles->add($roles);
+	    $this->setUserRoles($user, $this->getNewUserRoles());
 	}
 
 	private function onUserDelete($user)
 	{
-		$userRoleManager = $this->getModelManager('AuthUserRole');
-		$userRole = $userRoleManager->loadModel([
-			'user_auth_data' => $user->getAuthField()
-		]);
-		if ($userRole) {
-			$userRole->removeAllRelations();
-			$userRole->delete();
-		}
+        $userRole = UserRole::findOne(['userAuthValue' => $user->getAuthValue()]);
+        if (!$userRole) {
+            return;
+        }
+        
+        $userRole->clearRelated('roles');
+        $userRole->save();
+        $userRole->delete();
 	}
 }

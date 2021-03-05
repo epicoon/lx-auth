@@ -1,6 +1,0 @@
-AuthUserRole:
-  fields:
-    user_auth_data: {type: string}
-
-  relations:
-    roles: '><AuthRole'
