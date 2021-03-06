@@ -9,6 +9,6 @@ autoload:
 
 service:
   class: lx\auth\Service
-
   plugins: plugin
-#  models: model
+  components:
+    cli: lx\auth\cli\Cli
