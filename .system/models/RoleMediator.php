@@ -2,8 +2,8 @@
 
 namespace lx\auth\sys\models;
 
-use lx\modelnew\Model;
-use lx\modelnew\modelTools\RelatedModelsCollection;
+use lx\model\Model;
+use lx\model\modelTools\RelatedModelsCollection;
 use lx\auth\models\Right;
 use lx\auth\models\UserRole;
 

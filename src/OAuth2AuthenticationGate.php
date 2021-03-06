@@ -262,27 +262,6 @@ class OAuth2AuthenticationGate implements AuthenticationInterface, FusionCompone
 
 
     /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-     * PROTECTED
-     * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	/**
-	 * Получить менеджер моделей сервиса для текущего класса
-	 *
-	 * @param $modelName string
-	 * @return \lx\model\ModelManager|null
-	 */
-	protected function getModelManager($modelName)
-	{
-		$service = $this->app->getService($this->tokenServiceName);
-		if (!$service) {
-			return null;
-		}
-
-		return $service->getModelManager($modelName);
-	}
-
-
-    /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
      * PRIVATE
      * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

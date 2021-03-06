@@ -2,7 +2,7 @@
 
 namespace lx\auth\sys\models;
 
-use lx\modelnew\Model;
+use lx\model\Model;
 
 /**
  * Class AccessTokenMediator

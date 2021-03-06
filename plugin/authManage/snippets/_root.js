@@ -17,7 +17,7 @@ body.begin();
 
 	var boxRights = mbox.sheet(0).add(lx.Box, {margin:'10px'});
 	boxRights.setPlugin({
-		name: 'lx/modelnew:relationManager',
+		name: 'lx/model:relationManager',
 		attributes: {
 			model: 'lx/auth.Role',
 			relation: 'rights'
@@ -26,7 +26,7 @@ body.begin();
 
 	var boxUsers = mbox.sheet(1).add(lx.Box, {margin:'10px'});
 	boxUsers.setPlugin({
-		name: 'lx/modelnew:relationManager',
+		name: 'lx/model:relationManager',
 		attributes: {
 			userModel: Plugin.attributes.userModel,
 			respondentName: 'UserRole',

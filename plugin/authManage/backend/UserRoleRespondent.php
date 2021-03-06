@@ -7,9 +7,9 @@ use lx\UserManagerInterface;
 use lx\auth\RbacAuthorizationGate;
 use lx\auth\models\Role;
 use lx\auth\models\UserRole;
-use lx\modelnew\modelTools\ModelsSerializer;
-use lx\modelnew\plugins\relationManager\backend\Respondent;
-use lx\modelnew\Model;
+use lx\model\modelTools\ModelsSerializer;
+use lx\model\plugins\relationManager\backend\Respondent;
+use lx\model\Model;
 
 class UserRoleRespondent extends Respondent
 {

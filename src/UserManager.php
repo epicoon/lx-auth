@@ -12,7 +12,7 @@ use lx\UserInterface;
 use lx\UserManagerInterface;
 use lx\ModelInterface;
 //TODO желательно отвязаться от модели в пользу интерфейса lx\ModelInterface
-use lx\modelnew\Model;
+use lx\model\Model;
 
 class UserManager implements UserManagerInterface, FusionComponentInterface
 {
