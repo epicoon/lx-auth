@@ -210,7 +210,7 @@ class OAuth2AuthenticationGate implements AuthenticationInterface, FusionCompone
 			$refreshToken = $arr[1];
 		}
 
-        $refreshTokenModel = RefreshToken::findOne(['token' => $refreshToken]);
+        $refreshTokenModel = RefreshToken::findOne(['token' => $refreshToken], false);
 		if (!$refreshTokenModel) {
 			return null;
 		}
@@ -248,10 +248,10 @@ class OAuth2AuthenticationGate implements AuthenticationInterface, FusionCompone
 
 		$time = (new \DateTime())->modify('-5 minutes')->format('Y-m-d H:i:s');
 
-        $accessToken = AccessToken::findOne(['userAuthValue' => $user->getAuthValue()]);
+        $accessToken = AccessToken::findOne(['userAuthValue' => $user->getAuthValue()], false);
         $accessToken->expire = $time;
 
-        $refreshToken = RefreshToken::findOne(['userAuthValue' => $user->getAuthValue()]);
+        $refreshToken = RefreshToken::findOne(['userAuthValue' => $user->getAuthValue()], false);
         $refreshToken->expire = $time;
 
         $accessToken->getRepository()->hold();
@@ -288,7 +288,7 @@ class OAuth2AuthenticationGate implements AuthenticationInterface, FusionCompone
         ?UserInterface $defaultUser = null
     ): ?UserInterface
     {
-        $tokenModel = $tokenClass::findOne(['token' => $token]);
+        $tokenModel = $tokenClass::findOne(['token' => $token], false);
         if (!$tokenModel) {
             \lx::devLog(['_'=>[__FILE__,__CLASS__,__METHOD__,__LINE__],
                 '__trace__' => debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT&DEBUG_BACKTRACE_IGNORE_ARGS),
@@ -364,7 +364,7 @@ class OAuth2AuthenticationGate implements AuthenticationInterface, FusionCompone
 	    /** @var AccessToken|RefreshToken $token */
 	    $token = $tokenClass::findOne([
 	        'userAuthValue' => $user->getAuthValue(),
-        ]);
+        ], false);
         if (!$token) {
             $token = new $tokenClass([
                 'userAuthValue' => $user->getAuthValue(),
