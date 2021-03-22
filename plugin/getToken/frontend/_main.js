@@ -16,7 +16,17 @@ function trySendToken() {
 function tryAuth(res) {
 	lx.User.set(res);
 	(new lx.Request(document.location.pathname)).send()
-		.then(res=>lx.body.setPlugin(res))
+		.then(res=>{
+			if (!res) return;
+
+			if (res.isString) {
+				lx.body.html(res);
+			} else if (res.isObject && res.pluginInfo) {
+				lx.body.setPlugin(res);
+			} else {
+				lx.body.html(JSON.stringify(res));
+			}
+		})
 		.catch(res=>checkResultProblems(res));
 }
 
