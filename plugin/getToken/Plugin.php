@@ -4,8 +4,9 @@ namespace lx\auth\plugin\getToken;
 
 use lx\auth\OAuth2AuthenticationGate;
 
-class Plugin extends \lx\Plugin {
-	protected function init()
+class Plugin extends \lx\Plugin
+{
+	protected function init(): void
 	{
 		/** @var OAuth2AuthenticationGate $gate */
 		$gate = $this->app->authenticationGate;

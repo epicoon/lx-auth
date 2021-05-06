@@ -2,6 +2,8 @@
 
 namespace lx\auth;
 
+use lx\Plugin;
+use lx\Service;
 use lx\ApplicationToolTrait;
 use lx\ArrayHelper;
 use lx\auth\models\DefaultList;
@@ -14,6 +16,7 @@ use lx\EventListenerTrait;
 use lx\FusionComponentInterface;
 use lx\FusionComponentTrait;
 use lx\ObjectTrait;
+use lx\ResourceAccessDataInterface;
 use lx\ResourceContext;
 use lx\UserEventsEnum;
 use lx\UserInterface;
@@ -25,10 +28,10 @@ class RbacAuthorizationGate implements AuthorizationInterface, FusionComponentIn
 	use FusionComponentTrait;
 	use EventListenerTrait;
 
-	protected $rbacServiceName = 'lx/auth';
-	protected $rbacManagePluginName = 'lx/auth:authManage';
+	protected string $rbacServiceName = 'lx/auth';
+	protected string $rbacManagePluginName = 'lx/auth:authManage';
 
-	public static function getEventHandlersMap()
+	public static function getEventHandlersMap(): array
 	{
 		return [
 			UserEventsEnum::NEW_USER => 'onNewUser',
@@ -36,10 +39,13 @@ class RbacAuthorizationGate implements AuthorizationInterface, FusionComponentIn
 		];
 	}
 
-	public function checkUserAccess($user, $accessData)
+    /**
+     * @return mixed
+     */
+	public function checkUserAccess(UserInterface $user, ResourceAccessDataInterface $resourceAccessData)
 	{
 		$userRights = $this->getUserRights($user);
-		$resourceRigths = $accessData->getData();
+		$resourceRigths = $resourceAccessData->getData();
 		foreach ($resourceRigths as $right) {
 			if (!in_array($right, $userRights)) {
 				return false;
@@ -49,21 +55,20 @@ class RbacAuthorizationGate implements AuthorizationInterface, FusionComponentIn
 		return true;
 	}
 
-	public function getService()
+	public function getService(): ?Service
 	{
 		return $this->app->getService($this->rbacServiceName);
 	}
 
-	public function getManagePlugin()
+	public function getManagePlugin(): Plugin
 	{
 		return $this->app->getPlugin($this->rbacManagePluginName);
 	}
 
     /**
-     * @param UserInterface $user
-     * @param Role[] $roles
+     * @param iterable<Role> $roles
      */
-	public function setUserRoles(UserInterface $user, iterable $roles)
+	public function setUserRoles(UserInterface $user, iterable $roles): void
     {
         $userRole = UserRole::findOne(['userAuthValue' => $user->getAuthValue()]);
         if (!$userRole) {
@@ -80,10 +85,9 @@ class RbacAuthorizationGate implements AuthorizationInterface, FusionComponentIn
     }
 
     /**
-     * @param UserInterface $user
-     * @param Role[] $roles
+     * @param iterable<Role> $roles
      */
-    public function unsetUserRoles(UserInterface $user, iterable $roles)
+    public function unsetUserRoles(UserInterface $user, iterable $roles): void
     {
         $userRole = UserRole::findOne(['userAuthValue' => $user->getAuthValue()]);
         if (!$userRole) {
@@ -97,11 +101,7 @@ class RbacAuthorizationGate implements AuthorizationInterface, FusionComponentIn
         $userRole->save();
     }
 	
-	/**
-	 * @param UserInterface $user
-	 * @return array
-	 */
-	private function getUserRights($user): array
+	private function getUserRights(UserInterface $user): array
 	{
 		$roles = $this->getUserRoles($user);
 		if (ArrayHelper::isEmpty($roles)) {
@@ -123,8 +123,7 @@ class RbacAuthorizationGate implements AuthorizationInterface, FusionComponentIn
 	}
 
     /**
-     * @param UserInterface $user
-     * @return iterable|Role[]
+     * @return iterable<Role>
      */
 	private function getUserRoles(UserInterface $user): iterable
 	{
@@ -140,7 +139,10 @@ class RbacAuthorizationGate implements AuthorizationInterface, FusionComponentIn
 		return $userRole->roles;
 	}
 
-	private function getNewUserRoles()
+    /**
+     * @return iterable<Role>
+     */
+	private function getNewUserRoles(): iterable
 	{
 	    /** @var DefaultList[] $defaults */
 	    $defaults = DefaultList::find([
@@ -158,19 +160,16 @@ class RbacAuthorizationGate implements AuthorizationInterface, FusionComponentIn
 	}
 
 
-	/*******************************************************************************************************************
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 	 * EVENT HANDLERS
-	 ******************************************************************************************************************/
+	 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-    /**
-     * @param UserInterface $user
-     */
-	private function onNewUser($user)
+	private function onNewUser(UserInterface $user): void
 	{
 	    $this->setUserRoles($user, $this->getNewUserRoles());
 	}
 
-	private function onUserDelete($user)
+	private function onUserDelete(UserInterface $user): void
 	{
         $userRole = UserRole::findOne(['userAuthValue' => $user->getAuthValue()]);
         if (!$userRole) {

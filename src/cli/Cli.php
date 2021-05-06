@@ -8,16 +8,12 @@ use lx\FusionComponentTrait;
 use lx\ObjectTrait;
 use lx\ServiceCliInterface;
 
-/**
- * Class Cli
- * @package lx\auth\cli
- */
 class Cli implements FusionComponentInterface, ServiceCliInterface
 {
     use ObjectTrait;
     use FusionComponentTrait;
 
-    public function getExtensionData()
+    public function getExtensionData(): array
     {
         return [
             [

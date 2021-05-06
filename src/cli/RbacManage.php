@@ -4,13 +4,9 @@ namespace lx\auth\cli;
 
 use lx\ServiceCliExecutor;
 
-/**
- * Class RbacManage
- * @package lx\auth\cli
- */
 class RbacManage extends ServiceCliExecutor
 {
-    public function run()
+    public function run(): void
     {
         $this->sendPlugin([
             'name' => 'lx/auth:authManage',

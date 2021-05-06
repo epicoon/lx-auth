@@ -11,10 +11,7 @@ use lx\UserManagerInterface;
  */
 class Plugin extends lxPlugin
 {
-    /**
-     * @return void
-     */
-	public function init()
+	public function init(): void
     {
         /** @var UserManagerInterface|null $userManager */
         $userManager = $this->app->userManager;

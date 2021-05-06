@@ -20,13 +20,14 @@ class UserManager implements UserManagerInterface, FusionComponentInterface
 	use ApplicationToolTrait;
 	use FusionComponentTrait;
 
-    private $userAuthFields = ['login'];
-    private $userAuthField = 'login';
-    private $userPasswordField = 'password';
-	private $publicFields = [];
-	private $userModelName;
+    private array $userAuthFields = ['login'];
+    private string $userAuthField = 'login';
+    private string $userPasswordField = 'password';
+	private array $publicFields = [];
+	private string $userModelName;
 
-	public function __construct(array $config = []) {
+	public function __construct(array $config = [])
+    {
 	    $this->__objectConstruct($config);
 
 		$userModel = $config['userModel'];
@@ -65,8 +66,6 @@ class UserManager implements UserManagerInterface, FusionComponentInterface
 
     /**
      * @param mixed $userAuthValue
-     * @param UserInterface|null $defaultUser
-     * @return UserInterface|null
      */
     public function identifyUserByAuthValue($userAuthValue, ?UserInterface $defaultUser = null): ?UserInterface
     {
@@ -84,9 +83,6 @@ class UserManager implements UserManagerInterface, FusionComponentInterface
 
     /**
      * @param mixed $userAuthValue
-     * @param string $password
-     * @param UserInterface|null $defaultUser
-     * @return UserInterface|null
      */
     public function identifyUserByPassword(
         $userAuthValue,
@@ -132,9 +128,7 @@ class UserManager implements UserManagerInterface, FusionComponentInterface
     }
 
     /**
-     * @param int|null $offset
-     * @param int|null $limit
-     * @return UserInterface[]
+     * @return array<UserInterface>
      */
 	public function getUsers(?int $offset = 0, ?int $limit = null): array
 	{
@@ -153,9 +147,6 @@ class UserManager implements UserManagerInterface, FusionComponentInterface
 	
     /**
      * @param mixed $authValue
-     * @param string $password
-     * @param array $fields
-     * @return UserInterface|null
      */
 	public function createUser($userAuthValue, string $password, array $fields = []): ?UserInterface
 	{
@@ -179,7 +170,7 @@ class UserManager implements UserManagerInterface, FusionComponentInterface
     /**
      * @param mixed $authValue
      */
-	public function deleteUser($userAuthValue)
+	public function deleteUser($userAuthValue): void
 	{
 		$user = $this->identifyUserByAuthValue($userAuthValue);
 		if (!$user) {
@@ -190,7 +181,8 @@ class UserManager implements UserManagerInterface, FusionComponentInterface
 		$user->getModel()->delete();
 	}
 	
-	protected function getPasswordHash($password) {
+	protected function getPasswordHash(string $password): string
+    {
 		$options = [
 			'salt' => md5($password),
 			'cost' => 12,

@@ -17,10 +17,6 @@ use lx\UserEventsEnum;
 use lx\UserInterface;
 use lx\UserManagerInterface;
 
-/**
- * Class OAuth2AuthenticationGate
- * @package lx\auth
- */
 class OAuth2AuthenticationGate implements AuthenticationInterface, FusionComponentInterface
 {
     use ObjectTrait;
@@ -35,26 +31,28 @@ class OAuth2AuthenticationGate implements AuthenticationInterface, FusionCompone
 	const AUTH_PROBLEM_TOKEN_EXPIRED = 20;
 	const AUTH_PROBLEM_USER_NOT_FOUND = 25;
 
-	protected $accessTokenLifetime = 300;
-	protected $refreshTokenLifetime = 84600;
+	protected int $accessTokenLifetime = 300;
+	protected int $refreshTokenLifetime = 84600;
+
+	//TODO
 	protected $tokenGenerator = null;
 
-	protected $tokenServiceName = 'lx/auth';
-	protected $checkTokenPlugin = 'lx/auth:getToken';
-	protected $loginForm = 'lx.auth.LoginForm';
+	protected string $tokenServiceName = 'lx/auth';
+	protected string $checkTokenPlugin = 'lx/auth:getToken';
+	protected string $loginForm = 'lx.auth.LoginForm';
 
-	private $authProblem;
+	private int $authProblem;
 
 	/**
-	 * Принимает в конфигурации информацию о модели пользователя
-	 * Первый способ:
-	 * 'userModel' => 'some/service.modelName'
-	 * Второй способ:
+	 * Configuration has to have user model information:
+	 * The first way:
+	 * 'userModel' => 'some/service.ModelName'
+	 * The second way:
 	 * 'userModel' => [
 	 *        'service' => 'some/service',
-	 *        'name' => 'modelName'
+	 *        'name' => 'ModelName'
 	 * ]
-	 * */
+	 */
 	public function __construct(array $config = [])
 	{
         $this->__objectConstruct($config);
@@ -62,20 +60,14 @@ class OAuth2AuthenticationGate implements AuthenticationInterface, FusionCompone
 		$this->authProblem = self::AUTH_PROBLEM_NO;
 	}
 
-	/**
-	 * @return array
-	 */
-	public static function getEventHandlersMap()
+	public static function getEventHandlersMap(): array
 	{
 		return [
 			UserEventsEnum::BEFORE_USER_DELETE => 'onUserDelete',
 		];
 	}
 
-	/**
-	 * @return string
-	 */
-	public function getLoginFormName()
+	public function getLoginFormName(): string
 	{
 		return $this->loginForm;
 	}
@@ -86,14 +78,14 @@ class OAuth2AuthenticationGate implements AuthenticationInterface, FusionCompone
      * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	/**
-	 * Попытка аутентифицировать пользователя:
-	 * - Проверяем данные запроса (заголовок Authorization, куки) - ищем токен доступа
-	 * - Если токен не найден или закончился срок действия - компонент "пользователь" остается гостем
-	 * - По токену ищем модель AccessToken
-	 * - Если модель не найдена - компонент "пользователь" остается гостем
-	 * - По полю логина модели ищем модель пользователя
-	 * - Если модель пользователя не найдена - компонент "пользователь" остается гостем
-	 * */
+	 * Try to authenticate user:
+	 * - Request checking (header Authorization, cookie) - find for access token
+	 * - If token not found, the user component stay guest
+	 * - By token find model AccessToken
+	 * - If model not found, the user component stay guest
+	 * - By AccessToken model auth-value find user model
+     * - If model not found, the user component stay guest
+	 */
     public function authenticateUser(?array $authData = null): ?UserInterface
 	{
 	    if ($authData !== null) {
@@ -121,13 +113,9 @@ class OAuth2AuthenticationGate implements AuthenticationInterface, FusionCompone
         return $this->authenticateUserByAccessToken($accessToken, $this->app->user);
 	}
 
-	/**
-	 * Сформировать ответ, пытающийся авторизовать пользователя
-	 * */
-	public function responseToAuthenticate()
+	public function responseToAuthenticate(): ?ResourceContext
 	{
 		switch ($this->authProblem) {
-			// Группа проблем, где можно инициировать аутентификацию
 			case self::AUTH_PROBLEM_TOKEN_NOT_RETRIEVED:
 			case self::AUTH_PROBLEM_TOKEN_EXPIRED:
 				// Послать плагин, который поищет токен доступа
@@ -137,28 +125,21 @@ class OAuth2AuthenticationGate implements AuthenticationInterface, FusionCompone
 					'plugin' => $arr[1],
 				]);
 
-			// Группа проблем, не разрешающихся аутентификацией
-			case self::AUTH_PROBLEM_NO:
-				// Проблем при аутентификации не было, но раз наложены ограничения при авторизации - доступа нет
-				return false;
-			case self::AUTH_PROBLEM_USER_COMPONENT_IS_UNAVAILABLE:
-				// Компонент приложения "пользователь" не сконфигурирован
-				return false;
-			case self::AUTH_PROBLEM_TOKEN_NOT_FOUND:
-				// Токен мы получили, но в своей системе не нашли - подозрительная ситуация
-				return false;
-			case self::AUTH_PROBLEM_USER_NOT_FOUND:
-				// Токен получили, нашли, но не нашли по нему пользователя - возможно ошибка базы
-				return false;
-		}
+            // Authirization limit
+            case self::AUTH_PROBLEM_NO:
+            // Application hasn't user component
+            case self::AUTH_PROBLEM_USER_COMPONENT_IS_UNAVAILABLE:
+            // Recieved token isn't exist
+            case self::AUTH_PROBLEM_TOKEN_NOT_FOUND:
+            // User wasn't found by token
+            case self::AUTH_PROBLEM_USER_NOT_FOUND:
+                return null;
+        }
 
-		return false;
+		return null;
 	}
 
-    /**
-     * @return int
-     */
-	public function getProblemCode()
+	public function getProblemCode(): int
     {
         return $this->authProblem;
     }
@@ -168,17 +149,17 @@ class OAuth2AuthenticationGate implements AuthenticationInterface, FusionCompone
 	 * PUBLIC
 	 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-    public function isTokenNotFound()
+    public function isTokenNotFound(): bool
     {
         return $this->authProblem == self::AUTH_PROBLEM_TOKEN_NOT_FOUND;
     }
 
-    public function isTokenExpired()
+    public function isTokenExpired(): bool
     {
         return $this->authProblem == self::AUTH_PROBLEM_TOKEN_EXPIRED;
     }
     
-    public function updateAccessTokenForUser($user)
+    public function updateAccessTokenForUser(UserInterface $user): AccessToken
 	{
 		return $this->updateTokenForUser(
 			$user,
@@ -187,7 +168,7 @@ class OAuth2AuthenticationGate implements AuthenticationInterface, FusionCompone
 		);
 	}
 
-	public function updateRefreshTokenForUser($user)
+	public function updateRefreshTokenForUser(UserInterface $user): RefreshToken
 	{
 		return $this->updateTokenForUser(
 			$user,
@@ -197,11 +178,9 @@ class OAuth2AuthenticationGate implements AuthenticationInterface, FusionCompone
 	}
 
     /**
-     * @param string $refreshToken
-     * @return array|null
      * @throws \Exception
      */
-	public function refreshTokens($refreshToken)
+	public function refreshTokens(string $refreshToken): ?array
 	{
 		$arr = explode(' ', $refreshToken);
 		if ($arr[0] != 'Bearer') {
@@ -236,7 +215,7 @@ class OAuth2AuthenticationGate implements AuthenticationInterface, FusionCompone
 		];
 	}
 
-	public function logOut(?UserInterface $user = null)
+	public function logOut(?UserInterface $user = null): void
 	{
 		if ($user === null) {
 			$user = $this->app->user;
@@ -277,9 +256,6 @@ class OAuth2AuthenticationGate implements AuthenticationInterface, FusionCompone
 
     /**
      * @param string&AccessToken&RefreshToken $tokenClass
-     * @param string $token
-     * @param UserInterface|null $defaultUser
-     * @return UserInterface|null
      * @throws \Exception
      */
     private function authenticateUserByToken(
@@ -317,12 +293,7 @@ class OAuth2AuthenticationGate implements AuthenticationInterface, FusionCompone
         return $user;
     }
 
-	/**
-	 * Ищем в данных запроса токен доступа
-	 *
-	 * @return string|null
-	 */
-	private function retrieveToken()
+	private function retrieveToken(): ?string
 	{
 		$token = null;
 
@@ -354,12 +325,10 @@ class OAuth2AuthenticationGate implements AuthenticationInterface, FusionCompone
 	}
 
     /**
-     * @param UserInterface $user
      * @param string&AccessToken&RefreshToken $tokenClass
-     * @param int $lifetime
      * @return AccessToken|RefreshToken
      */
-	private function updateTokenForUser($user, $tokenClass, $lifetime)
+	private function updateTokenForUser(UserInterface $user, string $tokenClass, int $lifetime)
 	{
 	    /** @var AccessToken|RefreshToken $token */
 	    $token = $tokenClass::findOne([
@@ -379,21 +348,20 @@ class OAuth2AuthenticationGate implements AuthenticationInterface, FusionCompone
         return $token;
 	}
 
-	private function getAccessTokenLifetime()
+	private function getAccessTokenLifetime(): int
 	{
 		return $this->accessTokenLifetime;
 	}
 
-	private function getRefreshTokenLifetime()
+	private function getRefreshTokenLifetime(): int
 	{
 		return $this->refreshTokenLifetime;
 	}
 
     /**
      * @param UserInterface&ModelInterface $user
-     * @return string
      */
-	private function genTokenForUser($user)
+	private function genTokenForUser(UserInterface $user): string
 	{
 		if ($this->tokenGenerator) {
 			return $this->tokenGenerator->generate();
@@ -407,10 +375,7 @@ class OAuth2AuthenticationGate implements AuthenticationInterface, FusionCompone
      * EVENT HANDLERS
      * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-    /**
-     * @param UserInterface $user
-     */
-	private function onUserDelete($user)
+	private function onUserDelete(UserInterface $user): void
 	{
 		$userAuthValue = $user->getAuthValue();
 		RefreshToken::deleteAll(['userAuthValue' => $userAuthValue]);

@@ -5,10 +5,6 @@ namespace lx\auth;
 use lx\AbstractResourceVoter;
 use lx\UserInterface;
 
-/**
- * Class RbacResourceVoter
- * @package lx\auth
- */
 class RbacResourceVoter extends AbstractResourceVoter
 {
 	public function run(UserInterface $user, string $actionName, array $params): bool

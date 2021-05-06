@@ -5,14 +5,12 @@ namespace lx\auth;
 use lx\AuthenticationInterface;
 use lx\Rect;
 use lx\ResponseCodeEnum;
+use lx\ResponseInterface;
 use lx\UserManagerInterface;
 
-/**
- * Форма логина
- * */
 class LoginForm extends Rect
 {
-	public function login($login, $password)
+	public function login(string $login, string $password): ResponseInterface
     {
         /** @var UserManagerInterface $userManager */
 		$userManager = $this->app->userManager;
@@ -36,7 +34,7 @@ class LoginForm extends Rect
         ]);
     }
 
-	public function register($login, $password)
+	public function register(string $login, string $password): ResponseInterface
     {
         /** @var UserManagerInterface $userManager */
 		$userManager = $this->app->userManager;

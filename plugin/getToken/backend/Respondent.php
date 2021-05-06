@@ -5,10 +5,11 @@ namespace lx\auth\plugin\getToken\backend;
 use lx\auth\OAuth2AuthenticationGate;
 use lx\AuthenticationInterface;
 use lx\ResponseCodeEnum;
+use lx\ResponseInterface;
 
 class Respondent extends \lx\Respondent
 {
-	public function tryAuthenticate()
+	public function tryAuthenticate(): ResponseInterface
 	{
 	    /** @var AuthenticationInterface $gate */
 		$gate = $this->app->authenticationGate;
@@ -29,7 +30,7 @@ class Respondent extends \lx\Respondent
 		return $this->prepareErrorResponse('Internal server error', ResponseCodeEnum::SERVER_ERROR);
 	}
 	
-	public function refreshTokens($refreshToken)
+	public function refreshTokens($refreshToken): ResponseInterface
 	{
         /** @var AuthenticationInterface $gate */
 		$gate = $this->app->authenticationGate;
