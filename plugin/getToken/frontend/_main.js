@@ -9,7 +9,7 @@ else lx.createObject(Plugin.attributes.loginForm);
 
 function trySendToken() {
 	^Respondent.tryAuthenticate()
-		.then(res=>tryAuth(res))
+		.then(res=>tryAuth(res.data))
 		.catch(res=>checkResultProblems(res));
 }
 
@@ -21,8 +21,8 @@ function tryAuth(res) {
 
 			if (res.isString) {
 				lx.body.html(res);
-			} else if (res.isObject && res.pluginInfo) {
-				lx.body.setPlugin(res);
+			} else if (res.isObject && res.data && res.data.pluginInfo) {
+				lx.body.setPlugin(res.data);
 			} else {
 				lx.body.html(JSON.stringify(res));
 			}
@@ -35,7 +35,7 @@ function tryRefreshTokens() {
 	if (!refreshToken) return false;
 
 	^Respondent.refreshTokens(refreshToken)
-		.then(res=>refreshTokens(res))
+		.then(res=>refreshTokens(res.data))
 		.catch(res=>checkResultProblems(res));
 
 	return true;

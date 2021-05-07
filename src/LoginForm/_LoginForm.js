@@ -51,7 +51,7 @@ class LoginForm extends lx.Box #lx:namespace lx.auth {
 					return;
 				}
 
-				__applyTokens(res.token, res.refreshToken);
+				__applyTokens(res.data.token, res.data.refreshToken);
 			}).catch(res=>{
 				switch (res.error_code) {
 					case 404:
@@ -68,7 +68,7 @@ class LoginForm extends lx.Box #lx:namespace lx.auth {
 					return;
 				}
 
-				__applyTokens(res.token, res.refreshToken);
+				__applyTokens(res.data.token, res.data.refreshToken);
 			});
 		});
 	}

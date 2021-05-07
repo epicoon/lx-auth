@@ -3,6 +3,7 @@
 namespace lx\auth;
 
 use lx\Rect;
+use lx\ResponseInterface;
 
 class LogoutButton extends Rect
 {

@@ -10,20 +10,21 @@ use lx\auth\models\UserRole;
 use lx\model\modelTools\ModelsSerializer;
 use lx\model\plugins\relationManager\backend\Respondent;
 use lx\model\Model;
+use lx\ResponseInterface;
 
 class UserRoleRespondent extends Respondent
 {
-	public function getCoreData(array $attributes): array
+	public function getCoreData(array $attributes): ResponseInterface
 	{
 	    $userModelName = $attributes['userModel'];
 
 	    /** @var string&Model $modelClass */
         $modelClass = Model::getModelClassName($userModelName);
-        return [
+        return $this->prepareResponse([
             'serviceName' => $modelClass::getModelService()->name,
             'modelName' => $modelClass::getStaticModelName(),
             'relation' => 'roles',
-        ];
+        ]);
 	}
 
     public function getRelationData(
@@ -31,14 +32,11 @@ class UserRoleRespondent extends Respondent
         string $modelName,
         string $relationName,
         array $filters
-    ): array
+    ): ResponseInterface
     {
         $modelClass = $this->defineModelClass($serviceName, $modelName);
         if ($this->hasErrors()) {
-            return [
-                'success' => false,
-                'message' => $this->getFirstError(),
-            ];
+            return $this->prepareWarningResponse($this->getFirstError());
         }
 
         /**
@@ -89,7 +87,7 @@ class UserRoleRespondent extends Respondent
             }
         }
 
-        return [
+        return $this->prepareResponse([
             'count0' => $usersTotalCount,
             'count1' => $rolesTotalCount,
             'models0' => $usersData,
@@ -97,7 +95,7 @@ class UserRoleRespondent extends Respondent
             'relatedServiceName' => 'lx/auth',
             'relatedModelName' => 'Role',
             'relations' => $relationsMap,
-        ];
+        ]);
     }
 
     public function createRelation(
@@ -106,7 +104,7 @@ class UserRoleRespondent extends Respondent
         int $pk0,
         string $relationName,
         int $pk1
-    ): ?array
+    ): ?ResponseInterface
 	{
 	    /** @var UserManagerInterface $userManager */
 	    $userManager = lx::$app->userManager;
@@ -126,7 +124,7 @@ class UserRoleRespondent extends Respondent
         int $pk0,
         string $relationName,
         int $pk1
-    ): ?array
+    ): ?ResponseInterface
 	{
         /** @var UserManagerInterface $userManager */
         $userManager = lx::$app->userManager;
@@ -140,7 +138,7 @@ class UserRoleRespondent extends Respondent
         return null;
 	}
 
-    public function createModel(string $serviceName, string $modelName, array $fields): ?array
+    public function createModel(string $serviceName, string $modelName, array $fields): ?ResponseInterface
 	{
         $modelClass = $this->defineModelClass($serviceName, $modelName);
 		if ($modelClass == Role::class) {
@@ -155,10 +153,7 @@ class UserRoleRespondent extends Respondent
 		$pass = $fields[$passFieldName] ?? '';
 
 		if (!$auth) {
-            return [
-                'success' => false,
-                'message' => "User field $authFieldName is required",
-            ];
+            return $this->prepareWarningResponse("User field $authFieldName is required");
 		}
 
         unset($fields[$authFieldName]);
@@ -166,16 +161,13 @@ class UserRoleRespondent extends Respondent
 
 		$user = $userManager->createUser($auth, $pass, $fields);
 		if (!$user) {
-            return [
-                'success' => false,
-                'message' => "User with this $authFieldName aready exists",
-            ];
+            return $this->prepareWarningResponse("User with this $authFieldName aready exists");
 		}
 
 		return null;
 	}
 
-    public function deleteModel(string $serviceName, string $modelName, int $pk): ?array
+    public function deleteModel(string $serviceName, string $modelName, int $pk): ?ResponseInterface
 	{
         $modelClass = $this->defineModelClass($serviceName, $modelName);
         if ($modelClass == Role::class) {
@@ -186,10 +178,7 @@ class UserRoleRespondent extends Respondent
         $userManager = $this->app->userManager;
         $user = $userManager->identifyUserById($pk);
         if (!$user) {
-            return [
-                'success' => false,
-                'message' => 'User not found',
-            ];
+            return $this->prepareWarningResponse('User not found');
         }
 
         $userManager->deleteUser($user->getAuthValue());
