@@ -39,10 +39,7 @@ class RbacAuthorizationGate implements AuthorizationInterface, FusionComponentIn
 		];
 	}
 
-    /**
-     * @return mixed
-     */
-	public function checkUserAccess(UserInterface $user, ResourceAccessDataInterface $resourceAccessData)
+	public function checkUserAccess(UserInterface $user, ResourceAccessDataInterface $resourceAccessData): bool
 	{
 		$userRights = $this->getUserRights($user);
 		$resourceRigths = $resourceAccessData->getData();
