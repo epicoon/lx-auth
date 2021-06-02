@@ -11,8 +11,6 @@ use lx\UserEventsEnum;
 use lx\UserInterface;
 use lx\UserManagerInterface;
 use lx\ModelInterface;
-//TODO желательно отвязаться от модели в пользу интерфейса lx\ModelInterface
-use lx\model\Model;
 
 class UserManager implements UserManagerInterface, FusionComponentInterface
 {
@@ -24,23 +22,17 @@ class UserManager implements UserManagerInterface, FusionComponentInterface
     private string $userAuthField = 'login';
     private string $userPasswordField = 'password';
 	private array $publicFields = [];
-	private string $userModelName;
+	private string $userModelClass;
 
 	public function __construct(array $config = [])
     {
 	    $this->__objectConstruct($config);
-
-		$userModel = $config['userModel'];
-		if (is_string($userModel)) {
-			$this->userModelName = $userModel;
-		} elseif (is_array($userModel)) {
-			$this->userModelName = $userModel['service'] . '.' . $userModel['name'];
-		}
-	}
+	    $this->userModelClass = $config['userModel'];
+    }
 
 	public function getUserModelName(): string
 	{
-		return $this->userModelName;
+		return $this->userModelClass::getStaticModelName();
 	}
 
 	public function getAuthFieldName(): string
@@ -204,10 +196,10 @@ class UserManager implements UserManagerInterface, FusionComponentInterface
     }
 
     /**
-     * @return string&Model
+     * @return string
      */
     private function getUserModelClass(): string
     {
-        return Model::getModelClassName($this->userModelName);
+        return $this->userModelClass;
     }
 }

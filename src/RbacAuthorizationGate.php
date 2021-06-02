@@ -28,9 +28,6 @@ class RbacAuthorizationGate implements AuthorizationInterface, FusionComponentIn
 	use FusionComponentTrait;
 	use EventListenerTrait;
 
-	protected string $rbacServiceName = 'lx/auth';
-	protected string $rbacManagePluginName = 'lx/auth:authManage';
-
 	public static function getEventHandlersMap(): array
 	{
 		return [
@@ -50,16 +47,6 @@ class RbacAuthorizationGate implements AuthorizationInterface, FusionComponentIn
 		}
 		
 		return true;
-	}
-
-	public function getService(): ?Service
-	{
-		return $this->app->getService($this->rbacServiceName);
-	}
-
-	public function getManagePlugin(): Plugin
-	{
-		return $this->app->getPlugin($this->rbacManagePluginName);
 	}
 
     /**
