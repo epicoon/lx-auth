@@ -10,7 +10,6 @@ use lx\ServiceCliInterface;
 
 class Cli implements FusionComponentInterface, ServiceCliInterface
 {
-    use ObjectTrait;
     use FusionComponentTrait;
 
     public function getExtensionData(): array

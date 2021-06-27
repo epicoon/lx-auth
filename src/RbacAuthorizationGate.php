@@ -23,7 +23,6 @@ use lx\UserInterface;
 
 class RbacAuthorizationGate implements AuthorizationInterface, FusionComponentInterface
 {
-    use ObjectTrait;
 	use ApplicationToolTrait;
 	use FusionComponentTrait;
 	use EventListenerTrait;

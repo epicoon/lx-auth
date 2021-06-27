@@ -14,7 +14,6 @@ use lx\ModelInterface;
 
 class UserManager implements UserManagerInterface, FusionComponentInterface
 {
-    use ObjectTrait;
 	use ApplicationToolTrait;
 	use FusionComponentTrait;
 
@@ -32,7 +31,7 @@ class UserManager implements UserManagerInterface, FusionComponentInterface
 
 	public function getUserModelName(): string
 	{
-		return $this->userModelClass::getStaticModelName();
+		return $this->userModelClass::getModelService()->name . '.' . $this->userModelClass::getStaticModelName();
 	}
 
 	public function getAuthFieldName(): string

@@ -5,7 +5,6 @@ namespace lx\auth;
 use lx\ApplicationToolTrait;
 use lx\auth\models\AccessToken;
 use lx\auth\models\RefreshToken;
-use lx\ClassOfServiceInterface;
 use lx\AuthenticationInterface;
 use lx\EventListenerTrait;
 use lx\FusionComponentInterface;
@@ -19,7 +18,6 @@ use lx\UserManagerInterface;
 
 class OAuth2AuthenticationGate implements AuthenticationInterface, FusionComponentInterface
 {
-    use ObjectTrait;
 	use ApplicationToolTrait;
 	use FusionComponentTrait;
 	use EventListenerTrait;
