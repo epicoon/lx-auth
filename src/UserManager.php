@@ -154,7 +154,7 @@ class UserManager implements UserManagerInterface, FusionComponentInterface
         $userModel->save();
 
         $user = $this->wrapUpUserModel($userModel);
-        $this->app->events->trigger(UserEventsEnum::NEW_USER, $user);
+        $this->app->events->trigger(UserEventsEnum::AFTER_USER_CREATED, $user);
         return $user;
 	}
 

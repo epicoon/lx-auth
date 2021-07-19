@@ -16,7 +16,7 @@ class Cli implements FusionComponentInterface, ServiceCliInterface
     {
         return [
             [
-                'type' => CliProcessor::COMMAND_TYPE_WEB_ONLY,
+                'type' => CliProcessor::COMMAND_TYPE_WEB,
                 'command' => 'rbac-manage',
                 'description' => 'User roles management',
                 'handler' => RbacManage::class,

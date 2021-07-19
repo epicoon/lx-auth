@@ -30,7 +30,7 @@ class RbacAuthorizationGate implements AuthorizationInterface, FusionComponentIn
 	public static function getEventHandlersMap(): array
 	{
 		return [
-			UserEventsEnum::NEW_USER => 'onNewUser',
+			UserEventsEnum::AFTER_USER_CREATED => 'onNewUser',
 			UserEventsEnum::BEFORE_USER_DELETE => 'onUserDelete',
 		];
 	}

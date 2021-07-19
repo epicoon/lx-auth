@@ -11,9 +11,13 @@ use lx\model\modelTools\ModelsSerializer;
 use lx\model\plugins\relationManager\backend\Respondent;
 use lx\model\Model;
 use lx\ResponseInterface;
+use lx\FlightRecorderHolderTrait;
+use lx\FlightRecorderHolderInterface;
 
-class UserRoleRespondent extends Respondent
+class UserRoleRespondent extends Respondent implements FlightRecorderHolderInterface
 {
+    use FlightRecorderHolderTrait;
+    
 	public function getCoreData(array $attributes): ResponseInterface
 	{
 	    $userModelName = $attributes['userModel'];
@@ -35,8 +39,8 @@ class UserRoleRespondent extends Respondent
     ): ResponseInterface
     {
         $modelClass = $this->defineModelClass($serviceName, $modelName);
-        if ($this->hasErrors()) {
-            return $this->prepareWarningResponse($this->getFirstError());
+        if ($this->hasFlightRecords()) {
+            return $this->prepareWarningResponse($this->getFirstFlightRecord());
         }
 
         /**
