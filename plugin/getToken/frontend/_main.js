@@ -50,9 +50,10 @@ function refreshTokens(res) {
 }
 
 function checkResultProblems(res) {
+	console.log(res);
 	switch (res.error_code) {
 		case 401:
-			if (res.error_details && res.error_details[0] == 'expired' && tryRefreshTokens()) break;
+			if (res.error_details == 'expired' && tryRefreshTokens()) break;
 			lx.createObject(Plugin.attributes.loginForm);
 			break;
 		case 403:
