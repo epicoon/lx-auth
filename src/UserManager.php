@@ -44,6 +44,14 @@ class UserManager implements UserManagerInterface, FusionComponentInterface
 		return $this->userPasswordField;
 	}
 
+    /**
+     * @return mixed
+     */
+	public function getAuthField(ModelInterface $userModel)
+    {
+        return $userModel->getField($this->getAuthFieldName());
+    }
+
     public function identifyUserById(int $id, ?UserInterface $defaultUser = null): ?UserInterface
     {
         $userClass = $this->getUserModelClass();
