@@ -41,8 +41,8 @@ class LoginForm extends lx.Box #lx:namespace lx.auth {
 		this.add(lx.Button, {width: 6, key: 'register', text: #lx:i18n(lx.auth.LoginForm.Register)});
 	}
 
-	#lx:client postBuild(config) {
-		super.postBuild(config);
+	#lx:client clientBuild(config) {
+		super.clientBuild(config);
 
 		this->send.click(()=>{
 			^self::login(this->login.value(), this->password.value()).then(res=>{
