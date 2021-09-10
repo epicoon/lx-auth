@@ -50,7 +50,6 @@ function refreshTokens(res) {
 }
 
 function checkResultProblems(res) {
-	console.log(res);
 	switch (res.error_code) {
 		case 401:
 			if (res.error_details == 'expired' && tryRefreshTokens()) break;
