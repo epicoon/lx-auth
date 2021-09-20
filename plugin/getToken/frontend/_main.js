@@ -19,9 +19,9 @@ function tryAuth(res) {
 		.then(res=>{
 			if (!res) return;
 
-			if (res.isString) {
+			if (lx.isString(res)) {
 				lx.body.html(res);
-			} else if (res.isObject && res.data && res.data.pluginInfo) {
+			} else if (lx.isObject(res) && res.data && res.data.pluginInfo) {
 				lx.body.setPlugin(res.data);
 			} else {
 				lx.body.html(JSON.stringify(res));
