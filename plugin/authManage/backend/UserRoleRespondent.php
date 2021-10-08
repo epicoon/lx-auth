@@ -149,8 +149,7 @@ class UserRoleRespondent extends Respondent implements FlightRecorderHolderInter
 			return parent::createModel($serviceName, $modelName, $fields);
 		}
 
-		/** @var UserManagerInterface $userManager */
-		$userManager = $this->app->userManager;
+		$userManager = lx::$app->userManager;
 		$authFieldName = $userManager->getAuthFieldName();
 		$passFieldName = $userManager->getPasswordFieldName();
 		$auth = $fields[$authFieldName] ?? null;
@@ -178,8 +177,7 @@ class UserRoleRespondent extends Respondent implements FlightRecorderHolderInter
             return parent::deleteModel($serviceName, $modelName, $pk);
         }
 
-        /** @var UserManagerInterface $userManager */
-        $userManager = $this->app->userManager;
+        $userManager = lx::$app->userManager;
         $user = $userManager->identifyUserById($pk);
         if (!$user) {
             return $this->prepareWarningResponse('User not found');

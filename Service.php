@@ -2,14 +2,17 @@
 
 namespace lx\auth;
 
+use lx;
+
 class Service extends \lx\Service
 {
-	public function getJsCoreExtension(): string
-	{
-		return "lx.__auth = function(request){
-			let token = lx.Storage.get('lxauthtoken');
-			if (!token) return;
-			request.setRequestHeader('Authorization', token);
-		};";
-	}
+    public function getJsModules(): array
+    {
+        $gate = lx::$app->authenticationGate;
+        if (!$gate) {
+            return [];
+        }
+
+        return $gate->getJsModules();
+    }
 }

@@ -2,7 +2,7 @@
 
 namespace lx\auth;
 
-use lx\ApplicationToolTrait;
+use lx;
 use lx\auth\models\AccessToken;
 use lx\auth\models\RefreshToken;
 use lx\AuthenticationInterface;
@@ -18,7 +18,6 @@ use lx\UserManagerInterface;
 
 class OAuth2AuthenticationGate implements AuthenticationInterface, FusionComponentInterface
 {
-	use ApplicationToolTrait;
 	use FusionComponentTrait;
 	use EventListenerTrait;
 
@@ -38,6 +37,7 @@ class OAuth2AuthenticationGate implements AuthenticationInterface, FusionCompone
 	protected string $tokenServiceName = 'lx/auth';
 	protected string $checkTokenPlugin = 'lx/auth:getToken';
 	protected string $loginForm = 'lx.auth.LoginForm';
+    protected array $jsModules = ['lx.auth.TokenReader'];
 
 	private int $authProblem;
 
@@ -108,7 +108,7 @@ class OAuth2AuthenticationGate implements AuthenticationInterface, FusionCompone
             return null;
         }
 
-        return $this->authenticateUserByAccessToken($accessToken, $this->app->user);
+        return $this->authenticateUserByAccessToken($accessToken, lx::$app->user);
 	}
 
 	public function responseToAuthenticate(): ?ResourceContext
@@ -140,6 +140,11 @@ class OAuth2AuthenticationGate implements AuthenticationInterface, FusionCompone
 	public function getProblemCode(): int
     {
         return $this->authProblem;
+    }
+
+    public function getJsModules(): array
+    {
+        return $this->jsModules;
     }
 
 
@@ -199,24 +204,28 @@ class OAuth2AuthenticationGate implements AuthenticationInterface, FusionCompone
 			return null;
 		}
 
-		/** @var UserManagerInterface $userManager */
-		$userManager = $this->app->userManager;
+		$userManager = lx::$app->userManager;
 		$user = $userManager->identifyUserByAuthValue($refreshTokenModel->userAuthValue);
 		if (!$user) {
 			$this->authProblem = self::AUTH_PROBLEM_USER_NOT_FOUND;
 			return null;
 		}
 
+        $accessToken = $this->updateAccessTokenForUser($user);
+        $refreshToken = $this->updateRefreshTokenForUser($user);
 		return [
-			$this->updateAccessTokenForUser($user),
-			$this->updateRefreshTokenForUser($user),
+            'user' => $user,
+            'accessTokenModel' => $accessToken,
+            'refreshTokenModel' => $refreshToken,
+            'accessToken' => 'Bearer ' . $accessToken->token,
+            'refreshToken' => 'Bearer ' . $refreshToken->token,
 		];
 	}
 
 	public function logOut(?UserInterface $user = null): void
 	{
 		if ($user === null) {
-			$user = $this->app->user;
+			$user = lx::$app->user;
 		}
 
         if ($user->isGuest()) {
@@ -280,8 +289,7 @@ class OAuth2AuthenticationGate implements AuthenticationInterface, FusionCompone
             return null;
         }
 
-        /** @var UserManagerInterface $userManager */
-        $userManager = $this->app->userManager;
+        $userManager = lx::$app->userManager;
         $user = $userManager->identifyUserByAuthValue($tokenModel->userAuthValue, $defaultUser);
         if (!$user) {
             $this->authProblem = self::AUTH_PROBLEM_USER_NOT_FOUND;
@@ -295,13 +303,13 @@ class OAuth2AuthenticationGate implements AuthenticationInterface, FusionCompone
 	{
 		$token = null;
 
-		$authHeader = $this->app->dialog->getHeader('Authorization');
+		$authHeader = lx::$app->dialog->getHeader('Authorization');
 		if ($authHeader) {
 			$token = $authHeader;
 		}
 
 		if ($token === null) {
-            $authCookie = $this->app->dialog->getCookie()->getFirstDefined(
+            $authCookie = lx::$app->dialog->getCookie()->getFirstDefined(
                 ['auth', 'authorization', 'token'],
                 false
             );

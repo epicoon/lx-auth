@@ -1,4 +1,15 @@
 {
+    "lx.auth.TokenReader": {
+        "name": "lx.auth.TokenReader",
+        "path": "modules\/TokenReader.js"
+    },
+    "lx.auth.TokenUpdater": {
+        "name": "lx.auth.TokenUpdater",
+        "path": "modules\/TokenUpdater.js",
+        "data": {
+            "backend": "lx\\auth\\modules\\TokenUpdater"
+        }
+    },
     "lx.auth.LoginForm": {
         "name": "lx.auth.LoginForm",
         "path": "src\/LoginForm\/_LoginForm.js",

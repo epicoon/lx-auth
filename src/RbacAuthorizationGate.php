@@ -4,7 +4,6 @@ namespace lx\auth;
 
 use lx\Plugin;
 use lx\Service;
-use lx\ApplicationToolTrait;
 use lx\ArrayHelper;
 use lx\auth\models\DefaultList;
 use lx\auth\models\Right;
@@ -23,7 +22,6 @@ use lx\UserInterface;
 
 class RbacAuthorizationGate implements AuthorizationInterface, FusionComponentInterface
 {
-	use ApplicationToolTrait;
 	use FusionComponentTrait;
 	use EventListenerTrait;
 

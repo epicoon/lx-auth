@@ -2,14 +2,17 @@
 
 namespace lx\auth;
 
-use lx\Rect;
+use lx;
+use lx\Module;
 use lx\ResponseInterface;
 
-class LogoutButton extends Rect
+class LogoutButton extends Module
 {
 	public function logout(): void
     {
-		$gate = $this->app->authenticationGate;
-		$gate->logOut();
+		$gate = lx::$app->authenticationGate;
+        if ($gate) {
+            $gate->logOut();
+        }
 	}
 }

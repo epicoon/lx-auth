@@ -2,6 +2,7 @@
 
 namespace lx\auth;
 
+use lx;
 use lx\AbstractResourceVoter;
 use lx\UserInterface;
 
@@ -9,7 +10,7 @@ class RbacResourceVoter extends AbstractResourceVoter
 {
 	public function run(UserInterface $user, string $actionName, array $params): bool
 	{
-		$authGate = $this->app->authorizationGate;
+		$authGate = lx::$app->authorizationGate;
 		if (!$authGate) {
 		    return true;
         }

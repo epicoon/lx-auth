@@ -2,18 +2,18 @@
 
 namespace lx\auth;
 
+use lx;
 use lx\AuthenticationInterface;
-use lx\Rect;
+use lx\Module;
 use lx\ResponseCodeEnum;
 use lx\ResponseInterface;
 use lx\UserManagerInterface;
 
-class LoginForm extends Rect
+class LoginForm extends Module
 {
 	public function login(string $login, string $password): ResponseInterface
     {
-        /** @var UserManagerInterface $userManager */
-		$userManager = $this->app->userManager;
+		$userManager = lx::$app->userManager;
 
 		$user = $userManager->identifyUserByPassword($login, $password);
 		if (!$user) {
@@ -23,8 +23,7 @@ class LoginForm extends Rect
             );
 		}
 
-        /** @var AuthenticationInterface $gate */
-		$gate = $this->app->authenticationGate;
+		$gate = lx::$app->authenticationGate;
 		$accessTokenModel = $gate->updateAccessTokenForUser($user);
 		$refreshTokenModel = $gate->updateRefreshTokenForUser($user);
 
@@ -36,8 +35,7 @@ class LoginForm extends Rect
 
 	public function register(string $login, string $password): ResponseInterface
     {
-        /** @var UserManagerInterface $userManager */
-		$userManager = $this->app->userManager;
+		$userManager = lx::$app->userManager;
 		if ( ! $userManager) {
             \lx::devLog(['_'=>[__FILE__,__CLASS__,__METHOD__,__LINE__],
                 '__trace__' => debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT&DEBUG_BACKTRACE_IGNORE_ARGS),
@@ -52,8 +50,7 @@ class LoginForm extends Rect
 		    return $this->prepareErrorResponse("Login \"$login\" already exists");
 		}
 
-		/** @var AuthenticationInterface $gate */
-		$gate = $this->app->authenticationGate;
+		$gate = lx::$app->authenticationGate;
 		$accessTokenModel = $gate->updateAccessTokenForUser($user);
 		$refreshTokenModel = $gate->updateRefreshTokenForUser($user);
 

@@ -2,7 +2,7 @@
 
 namespace lx\auth;
 
-use lx\ApplicationToolTrait;
+use lx;
 use lx\AuthenticationInterface;
 use lx\FusionComponentInterface;
 use lx\FusionComponentTrait;
@@ -14,7 +14,6 @@ use lx\ModelInterface;
 
 class UserManager implements UserManagerInterface, FusionComponentInterface
 {
-	use ApplicationToolTrait;
 	use FusionComponentTrait;
 
     private array $userAuthFields = ['login'];
@@ -107,7 +106,7 @@ class UserManager implements UserManagerInterface, FusionComponentInterface
 	public function getPublicData(?UserInterface $user = null): array
     {
         if ($user === null) {
-            $user = $this->app->user;
+            $user = lx::$app->user;
         }
         
         if ($user->isGuest()) {
@@ -143,6 +142,11 @@ class UserManager implements UserManagerInterface, FusionComponentInterface
         
 		return $result;
 	}
+    
+    public function getUser(ModelInterface $userData): UserInterface
+    {
+        return $this->wrapUpUserModel($userData);
+    }
 	
     /**
      * @param mixed $authValue
@@ -162,7 +166,7 @@ class UserManager implements UserManagerInterface, FusionComponentInterface
         $userModel->save();
 
         $user = $this->wrapUpUserModel($userModel);
-        $this->app->events->trigger(UserEventsEnum::AFTER_USER_CREATED, $user);
+        lx::$app->events->trigger(UserEventsEnum::AFTER_USER_CREATED, $user);
         return $user;
 	}
 
@@ -176,7 +180,7 @@ class UserManager implements UserManagerInterface, FusionComponentInterface
 			return;
 		}
 
-		$this->app->events->trigger(UserEventsEnum::BEFORE_USER_DELETE, $user);
+		lx::$app->events->trigger(UserEventsEnum::BEFORE_USER_DELETE, $user);
 		$user->getModel()->delete();
 	}
 	
@@ -192,9 +196,9 @@ class UserManager implements UserManagerInterface, FusionComponentInterface
 	private function wrapUpUserModel(ModelInterface $userModel, ?UserInterface $user = null): UserInterface
     {
         if ($user === null) {
-            $class = get_class($this->app->user);
+            $class = get_class(lx::$app->user);
             /** @var UserInterface $user */
-            $user = $this->app->diProcessor->create($class);
+            $user = lx::$app->diProcessor->create($class);
         }
         
         $user->setModel($userModel);
