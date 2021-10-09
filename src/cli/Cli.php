@@ -5,7 +5,6 @@ namespace lx\auth\cli;
 use lx\CliProcessor;
 use lx\FusionComponentInterface;
 use lx\FusionComponentTrait;
-use lx\ObjectTrait;
 use lx\ServiceCliInterface;
 
 class Cli implements FusionComponentInterface, ServiceCliInterface

@@ -6,7 +6,6 @@ use lx;
 use lx\AuthenticationInterface;
 use lx\FusionComponentInterface;
 use lx\FusionComponentTrait;
-use lx\ObjectTrait;
 use lx\UserEventsEnum;
 use lx\UserInterface;
 use lx\UserManagerInterface;
@@ -22,7 +21,7 @@ class UserManager implements UserManagerInterface, FusionComponentInterface
 	private array $publicFields = [];
 	private string $userModelClass;
 
-	public function __construct(array $config = [])
+	public function __construct(iterable $config = [])
     {
 	    $this->__objectConstruct($config);
 	    $this->userModelClass = $config['userModel'];

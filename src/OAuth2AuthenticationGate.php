@@ -10,7 +10,6 @@ use lx\EventListenerTrait;
 use lx\FusionComponentInterface;
 use lx\FusionComponentTrait;
 use lx\ModelInterface;
-use lx\ObjectTrait;
 use lx\ResourceContext;
 use lx\UserEventsEnum;
 use lx\UserInterface;
@@ -51,7 +50,7 @@ class OAuth2AuthenticationGate implements AuthenticationInterface, FusionCompone
 	 *        'name' => 'ModelName'
 	 * ]
 	 */
-	public function __construct(array $config = [])
+	public function __construct(iterable $config = [])
 	{
         $this->__objectConstruct($config);
 

@@ -14,7 +14,6 @@ use lx\EventListenerInterface;
 use lx\EventListenerTrait;
 use lx\FusionComponentInterface;
 use lx\FusionComponentTrait;
-use lx\ObjectTrait;
 use lx\ResourceAccessDataInterface;
 use lx\ResourceContext;
 use lx\UserEventsEnum;
