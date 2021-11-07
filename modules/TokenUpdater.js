@@ -23,7 +23,7 @@ class TokenUpdater extends lx.Module #lx:namespace lx.auth {
     run() {
         let token = lx.Storage.get('lxauthtoken');
         if (!token) {
-            setTimeout(()=>this._onRejected(), 100);
+            setTimeout(()=>this.__runRejected({error_code: 401}), 100);
             return this;
         }
 
