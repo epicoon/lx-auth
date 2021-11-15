@@ -8,8 +8,6 @@
 #lx:use lx.Input;
 #lx:use lx.Button;
 
-#lx:private;
-
 /**
  * Форма логина
  * */
