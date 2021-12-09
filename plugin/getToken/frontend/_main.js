@@ -7,7 +7,7 @@
 
 (new lx.auth.TokenUpdater()).run()
 	.onAccepted(function (userData) {
-		(new lx.Request(document.location.pathname)).send()
+		(new lx.HttpRequest(document.location.pathname)).send()
 			.then(res => {
 				if (!res) {
 					this.reject({error_code: 500});

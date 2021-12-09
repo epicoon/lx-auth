@@ -79,7 +79,7 @@ class LoginForm extends lx.Box #lx:namespace lx.auth {
 
 		window.location.reload();
 		//TODO может так оно получше, только надо понимать что дальше с полученным делать. Коллбэк?
-		// var r = new lx.Request(window.location.pathname);
+		// var r = new lx.HttpRequest(window.location.pathname);
 		// r.send().then((res)=>lx.body.setPlugin(res));
 	}
 }
