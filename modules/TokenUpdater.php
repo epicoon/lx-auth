@@ -37,7 +37,7 @@ class TokenUpdater extends Module
         if ($tokensMap === null) {
             if ($gate->isTokenExpired()) {
                 return $this->prepareErrorResponse(
-                    'Resource is unavailable',
+                    'expired',
                     ResponseCodeEnum::UNAUTHORIZED
                 );
             } else {
