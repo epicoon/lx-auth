@@ -102,6 +102,8 @@ class LoginForm extends lx.Box #lx:namespace lx.auth {
 					}
 
 					__applyTokens(this, res.data.token, res.data.refreshToken);
+				}).catch(res=>{
+					lx.Tost.error(res.data);
 				});
 			});
 		}

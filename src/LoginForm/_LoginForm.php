@@ -47,7 +47,7 @@ class LoginForm extends Module
 
 		$user = $userManager->createUser($login, $password);
 		if (!$user) {
-		    return $this->prepareErrorResponse("Login \"$login\" already exists");
+		    return $this->prepareErrorResponse("Can not create user \"$login\"");
 		}
 
 		$gate = lx::$app->authenticationGate;
