@@ -77,41 +77,21 @@ class LoginForm extends lx.Box #lx:namespace lx.auth {
 		const form = this->form;
 
 		form->send.click(()=>{
-			^self::login(form->login.value(), form->password.value()).then(res=>{
-				if (res.success === false) {
-					lx.Tost.warning(res.error_details[0]);
-					return;
-				}
-
-				__applyTokens(this, res.data.token, res.data.refreshToken);
-			}).catch(res=>{
-				switch (res.error_code) {
-					case 404:
-						lx.Tost.warning('User not found');
-						break;
-				}
-			});
+			^self::login(form->login.value(), form->password.value())
+				.then(res=>__applyTokens(this, res.data.token, res.data.refreshToken))
+				.catch(res=>lx.Tost.error(res.error_details));
 		});
 
 		if (form.contains('register')) {
 			form->register.click(()=>{
-				^self::register(form->login.value(), form->password.value()).then(res=>{
-					if (res.success === false) {
-						lx.Tost.warning(res.error_details[0]);
-						return;
-					}
-
-					__applyTokens(this, res.data.token, res.data.refreshToken);
-				}).catch(res=>{
-					lx.Tost.error(res.data);
-				});
+				^self::register(form->login.value(), form->password.value())
+					.then(res=>__applyTokens(this, res.data.token, res.data.refreshToken))
+					.catch(res=>lx.Tost.error(res.error_details));
 			});
 		}
 
 		if (form.contains('close')) {
-			form->close.click(()=>{
-				this.del();
-			});
+			form->close.click(()=>this.del());
 		}
 	}
 }
