@@ -36,7 +36,7 @@ class OAuth2AuthenticationGate implements AuthenticationInterface, FusionCompone
 	protected string $tokenServiceName = 'lx/auth';
 	protected string $checkTokenPlugin = 'lx/auth:getToken';
 	protected string $loginForm = 'lx.auth.LoginForm';
-    protected array $jsModules = ['lx.auth.TokenReader'];
+    protected array $jsModules = ['lx.auth.AjaxAuthHandler'];
 
 	private int $authProblem;
 

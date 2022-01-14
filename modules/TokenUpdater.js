@@ -38,7 +38,8 @@ class TokenUpdater extends lx.Module #lx:namespace lx.auth {
     __trySendToken() {
         ^self::tryAuthenticate()
             .then(res=>{
-                this.__runAccepted(res.data)
+                lx.User.set(res.data);
+                this.__runAccepted()
             })
             .catch(res=>{
                 if (res.error_code == 401 && res.error_details == 'expired' && this.__tryRefreshTokens()) return;
@@ -58,7 +59,8 @@ class TokenUpdater extends lx.Module #lx:namespace lx.auth {
                 }
                 lx.Storage.set('lxauthtoken', res.data.accessToken);
                 lx.Storage.set('lxauthretoken', res.data.refreshToken);
-                this.__runAccepted(res.data.userData);
+                lx.User.set(res.data.userData);
+                this.__runAccepted();
             })
             .catch(res=>{
                 this.__runRejected(res);
@@ -66,9 +68,9 @@ class TokenUpdater extends lx.Module #lx:namespace lx.auth {
         return true;
     }
 
-    __runAccepted(userData) {
+    __runAccepted() {
         try {
-            this._onAccepted.call(this, userData);
+            this._onAccepted.call(this);
         } catch (e) {
             this._onRejected.call(this, e);
         }

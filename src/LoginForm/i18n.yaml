@@ -3,9 +3,11 @@ en-EN:
   lx.auth.LoginForm.Password: Password
   lx.auth.LoginForm.Send: Send
   lx.auth.LoginForm.Register: Register
+  lx.auth.LoginForm.Close: Close
 
 ru-RU:
   lx.auth.LoginForm.Login: Логин
   lx.auth.LoginForm.Password: Пароль
   lx.auth.LoginForm.Send: Отправить
   lx.auth.LoginForm.Register: Зарегистрироваться
+  lx.auth.LoginForm.Close: Закрыть

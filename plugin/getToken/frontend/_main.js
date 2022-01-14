@@ -6,7 +6,7 @@
 #lx:use lx.auth.TokenUpdater;
 
 (new lx.auth.TokenUpdater()).run()
-	.onAccepted(function (userData) {
+	.onAccepted(function() {
 		(new lx.HttpRequest(document.location.pathname)).send()
 			.then(res => {
 				if (!res) {
@@ -14,7 +14,6 @@
 					return;
 				}
 
-				lx.User.set(userData);
 				if (lx.isString(res)) lx.body.html(res);
 				else if (lx.isObject(res) && res.data && res.data.pluginInfo)
 					lx.body.setPlugin(res.data);
@@ -25,7 +24,8 @@
 	.onRejected(error=>{
 		switch (error.error_code) {
 			case 401:
-				lx.createObject(Plugin.attributes.loginForm);
+				const form = lx.createObject(Plugin.attributes.loginForm);
+				form.on('authenticate', ()=>window.location.reload());
 				break;
 			case 403:
 				lx.Tost.warning('Resource is unavailable');

@@ -4,52 +4,86 @@
 	backend: lx\auth\LoginForm
 };
 
+#lx:use lx.MainCssContext;
+#lx:use lx.CssColorSchema;
 #lx:use lx.Box;
 #lx:use lx.Input;
 #lx:use lx.Button;
 
-/**
- * Форма логина
- * */
+/* 
+ * Special events:
+ * - authenticate()
+ */
 class LoginForm extends lx.Box #lx:namespace lx.auth {
 	modifyConfigBeforeApply(config) {
-		if (!config.geom) {
-			config.geom = [30, 20, 40, 40];
-		}
-
+		config.geom = true;
 		return config;
 	}
 
+	getBasicCss() {
+		return {
+			form: 'lx-auth-LoginForm',
+			background: 'lx-auth-LoginForm-back'
+		};
+	}
+
+	static initCssAsset(css) {
+		css.inheritClass('lx-auth-LoginForm', lx.MainCssContext.getClass('AbstractBox'));
+		css.addClass('lx-auth-LoginForm-back', {
+			opacity: 0.5,
+			backgroundColor: lx.CssColorSchema.widgetIconColor
+		});
+	}
+
+	/* config = {
+	 *	// стандартные для Box,
+	 *
+	 * {Boolean} registerButton
+	 * {Boolean} closeButton
+	 * }
+	 */
 	build(config) {
 		super.build(config);
-		
-		this.fill('lightgray');
-		this.grid({indent: '10px'});
 
-		var box = this.add(lx.Box, {text: #lx:i18n(lx.auth.LoginForm.Login), width:12});
+		this.add(lx.Rect, {geom: true, css: this.basicCss.background});
+		const form = this.add(lx.Box, {key: 'form', geom: [30, 20, 40, 40], css: this.basicCss.form});
+		form.grid({indent: '10px'});
+
+		var box = form.add(lx.Box, {text: #lx:i18n(lx.auth.LoginForm.Login), width:12});
 		box.align(lx.CENTER, lx.MIDDLE);
-		this.add(lx.Input, {key: 'login', width:12});
+		form.add(lx.Input, {key: 'login', width:12});
 
-		var box = this.add(lx.Box, {text: #lx:i18n(lx.auth.LoginForm.Password), width:12});
+		var box = form.add(lx.Box, {text: #lx:i18n(lx.auth.LoginForm.Password), width:12});
 		box.align(lx.CENTER, lx.MIDDLE);
-		this.add(lx.Input, {key: 'password', width:12});
-		this->password.setAttribute('type', 'password');
+		form.add(lx.Input, {key: 'password', width:12});
+		form->password.setAttribute('type', 'password');
 
-		this.add(lx.Button, {width: 6, key: 'send', text: #lx:i18n(lx.auth.LoginForm.Send)});
-		this.add(lx.Button, {width: 6, key: 'register', text: #lx:i18n(lx.auth.LoginForm.Register)});
+		let count = 1,
+			registerButton = lx.getFirstDefined(config.registerButton, true),
+			closeButton = lx.getFirstDefined(config.closeButton, false);
+		if (registerButton) count++;
+		if (closeButton) count++;
+		let width = 12 / count;
+		form.add(lx.Button, {width, key: 'send', text: #lx:i18n(lx.auth.LoginForm.Send)});
+		if (registerButton)
+			form.add(lx.Button, {width, key: 'register', text: #lx:i18n(lx.auth.LoginForm.Register)});
+		if (closeButton)
+			form.add(lx.Button, {width, key: 'close', text: #lx:i18n(lx.auth.LoginForm.Close)});
 	}
 
 	#lx:client clientBuild(config) {
 		super.clientBuild(config);
 
-		this->send.click(()=>{
-			^self::login(this->login.value(), this->password.value()).then(res=>{
+		const form = this->form;
+
+		form->send.click(()=>{
+			^self::login(form->login.value(), form->password.value()).then(res=>{
 				if (res.success === false) {
 					lx.Tost.warning(res.error_details[0]);
 					return;
 				}
 
-				__applyTokens(res.data.token, res.data.refreshToken);
+				__applyTokens(this, res.data.token, res.data.refreshToken);
 			}).catch(res=>{
 				switch (res.error_code) {
 					case 404:
@@ -59,27 +93,32 @@ class LoginForm extends lx.Box #lx:namespace lx.auth {
 			});
 		});
 
-		this->register.click(()=>{
-			^self::register(this->login.value(), this->password.value()).then(res=>{
-				if (res.success === false) {
-					lx.Tost.warning(res.error_details[0]);
-					return;
-				}
+		if (form.contains('register')) {
+			form->register.click(()=>{
+				^self::register(form->login.value(), form->password.value()).then(res=>{
+					if (res.success === false) {
+						lx.Tost.warning(res.error_details[0]);
+						return;
+					}
 
-				__applyTokens(res.data.token, res.data.refreshToken);
+					__applyTokens(this, res.data.token, res.data.refreshToken);
+				});
 			});
-		});
+		}
+
+		if (form.contains('close')) {
+			form->close.click(()=>{
+				this.del();
+			});
+		}
 	}
 }
 
 #lx:client {
-	function __applyTokens(token, refreshToken) {
+	function __applyTokens(self, token, refreshToken) {
 		lx.Storage.set('lxauthtoken', token);
 		lx.Storage.set('lxauthretoken', refreshToken);
-
-		window.location.reload();
-		//TODO может так оно получше, только надо понимать что дальше с полученным делать. Коллбэк?
-		// var r = new lx.HttpRequest(window.location.pathname);
-		// r.send().then((res)=>lx.body.setPlugin(res));
+		
+		self.trigger('authenticate');
 	}
 }

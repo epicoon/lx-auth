@@ -1,7 +1,7 @@
 {
-    "lx.auth.TokenReader": {
-        "name": "lx.auth.TokenReader",
-        "path": "modules\/TokenReader.js"
+    "lx.auth.AjaxAuthHandler": {
+        "name": "lx.auth.AjaxAuthHandler",
+        "path": "modules\/AjaxAuthHandler.js"
     },
     "lx.auth.TokenUpdater": {
         "name": "lx.auth.TokenUpdater",
