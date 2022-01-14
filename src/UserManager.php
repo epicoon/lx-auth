@@ -162,7 +162,9 @@ class UserManager implements UserManagerInterface, FusionComponentInterface
             $this->userAuthField => $userAuthValue,
             $this->userPasswordField => $this->getPasswordHash($password),
         ], $fields));
-        $userModel->save();
+        if (!$userModel->save()) {
+            return null;
+        }
 
         $user = $this->wrapUpUserModel($userModel);
         lx::$app->events->trigger(UserEventsEnum::AFTER_USER_CREATED, $user);
