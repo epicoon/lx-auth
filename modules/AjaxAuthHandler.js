@@ -1,4 +1,4 @@
-#lx:module lx.auth.AjaxAuthHandler;
+ #lx:module lx.auth.AjaxAuthHandler;
 
 lx.subscribe(lx.EVENT_BEFORE_AJAX_REQUEST, function (request) {
     let token = lx.Storage.get('lxauthtoken');
@@ -14,9 +14,7 @@ lx.subscribe(lx.EVENT_AJAX_REQUEST_UNAUTHORIZED, function (response, request, op
 
     lx.dependencies.promiseModules(['lx.auth.TokenUpdater', 'lx.auth.LoginForm'], ()=>{
         (new lx.auth.TokenUpdater()).run()
-            .onAccepted(function () {
-                lx.Dialog.request(options);
-            })
+            .onAccepted(()=>lx.Dialog.request(options))
             .onRejected(error=>{
                 switch (error.error_code) {
                     case 401:
