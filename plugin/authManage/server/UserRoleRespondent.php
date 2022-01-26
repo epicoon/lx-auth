@@ -1,6 +1,6 @@
 <?php
 
-namespace lx\auth\plugin\authManage\backend;
+namespace lx\auth\plugin\authManage\server;
 
 use lx;
 use lx\UserManagerInterface;
@@ -8,7 +8,7 @@ use lx\auth\RbacAuthorizationGate;
 use lx\auth\models\Role;
 use lx\auth\models\UserRole;
 use lx\model\modelTools\ModelsSerializer;
-use lx\model\plugins\relationManager\backend\Respondent;
+use lx\model\plugins\relationManager\server\Respondent;
 use lx\model\Model;
 use lx\ResponseInterface;
 use lx\FlightRecorderHolderTrait;

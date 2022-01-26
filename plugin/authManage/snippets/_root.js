@@ -5,7 +5,7 @@
 
 #lx:use lx.MultiBox;
 
-Snippet.widget.fill('white');
+Snippet.widget.addClass('lx-auth-back');
 
 var body = new lx.Box({geom:true});
 body.gridProportional({indent:'10px'});

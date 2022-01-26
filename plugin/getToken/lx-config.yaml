@@ -1,10 +1,9 @@
-class: lx\auth\plugin\getToken\Plugin
+server: lx\auth\plugin\getToken\server\Plugin
+client: client/Plugin.js
+
+respondents:
+  Respondent: Respondent
 
 rootSnippet: snippets/_root.js
 
-jsMain: frontend/_main.js
-
 cacheType: on
-
-respondents:
-  Respondent: backend\Respondent

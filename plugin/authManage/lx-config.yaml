@@ -1,10 +1,9 @@
-class: lx\auth\plugin\authManage\Plugin
+server: lx\auth\plugin\authManage\server\Plugin
+client: client/Plugin.js
+
+respondents:
+  UserRole: UserRoleRespondent
 
 rootSnippet: snippets/_root.js
 
-jsMain: frontend/_main.js
-
 cacheType: smart
-
-respondents:
-  UserRole: backend\UserRoleRespondent

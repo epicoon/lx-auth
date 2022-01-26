@@ -4,8 +4,6 @@
 	backend: lx\auth\LoginForm
 };
 
-#lx:use lx.MainCssContext;
-#lx:use lx.CssColorSchema;
 #lx:use lx.Box;
 #lx:use lx.Input;
 #lx:use lx.Button;
@@ -28,10 +26,10 @@ class LoginForm extends lx.Box #lx:namespace lx.auth {
 	}
 
 	static initCssAsset(css) {
-		css.inheritClass('lx-auth-LoginForm', lx.MainCssContext.getClass('AbstractBox'));
+		css.inheritClass('lx-auth-LoginForm', 'AbstractBox');
 		css.addClass('lx-auth-LoginForm-back', {
 			opacity: 0.5,
-			backgroundColor: lx.CssColorSchema.widgetIconColor
+			backgroundColor: css.preset.widgetIconColor
 		});
 	}
 
