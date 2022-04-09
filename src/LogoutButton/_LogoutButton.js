@@ -5,7 +5,8 @@
 
 #lx:use lx.Button;
 
-class LogoutButton extends lx.Button #lx:namespace lx.auth {
+#lx:namespace lx.auth;
+class LogoutButton extends lx.Button {
 	#lx:client clientBuild(config) {
 		super.clientBuild(config);
 

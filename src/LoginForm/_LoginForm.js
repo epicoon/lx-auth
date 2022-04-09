@@ -12,7 +12,8 @@
  * Special events:
  * - authenticate()
  */
-class LoginForm extends lx.Box #lx:namespace lx.auth {
+#lx:namespace lx.auth;
+class LoginForm extends lx.Box {
 	modifyConfigBeforeApply(config) {
 		config.geom = true;
 		return config;

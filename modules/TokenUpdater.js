@@ -3,7 +3,8 @@
     backend: lx\auth\modules\TokenUpdater
 };
 
-class TokenUpdater extends lx.Module #lx:namespace lx.auth {
+#lx:namespace lx.auth;
+class TokenUpdater extends lx.Module {
     constructor() {
         super();
         this._onAccepted = function(){};
