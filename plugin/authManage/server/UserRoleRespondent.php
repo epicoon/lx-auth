@@ -82,7 +82,7 @@ class UserRoleRespondent extends Respondent implements FlightRecorderHolderInter
         };
 
         $relationsMap = [];
-        $userRoles = UserRole::find(['userAuthValue' => array_keys($usersMap)]);
+        $userRoles = empty($usersMap) ? [] : UserRole::find(['userAuthValue' => array_keys($usersMap)]);
         /** @var UserRole $userRole */
         foreach ($userRoles as $userRole) {
             $list = $userRole->roles;
