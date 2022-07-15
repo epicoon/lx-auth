@@ -5,9 +5,6 @@ namespace lx\auth\sys\models;
 use lx\model\Model;
 
 /**
- * Class DefaultListMediator
- * @package lx\auth\sys\models
- *
  * @property string $type
  * @property string $value
  */

@@ -8,6 +8,8 @@ class Plugin extends \lx\Plugin
 {
     protected function init(): void
     {
+        parent::init();
+        
         $gate = lx::$app->authenticationGate;
         if ($gate) {
             $loginForm = $gate->getLoginFormName();

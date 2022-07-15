@@ -7,9 +7,6 @@ use lx\model\modelTools\RelatedModelsCollection;
 use lx\auth\models\Role;
 
 /**
- * Class RightMediator
- * @package lx\auth\sys\models
- *
  * @property string $name
  * @property RelatedModelsCollection&Role[] $roles
  */

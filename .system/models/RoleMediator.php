@@ -8,9 +8,6 @@ use lx\auth\models\Right;
 use lx\auth\models\UserRole;
 
 /**
- * Class RoleMediator
- * @package lx\auth\sys\models
- *
  * @property string $name
  * @property RelatedModelsCollection&Right[] $rights
  * @property RelatedModelsCollection&UserRole[] $userRoles

@@ -21,9 +21,8 @@ class UserManager implements UserManagerInterface, FusionComponentInterface
 	private array $publicFields = [];
 	private string $userModelClass;
 
-	public function __construct(iterable $config = [])
+	protected function afterObjectConstruct(iterable $config): void
     {
-	    $this->__objectConstruct($config);
 	    $this->userModelClass = $config['userModel'];
     }
 

@@ -15,6 +15,16 @@ use lx\UserEventsEnum;
 use lx\UserInterface;
 use lx\UserManagerInterface;
 
+/**
+ * Configuration has to have user model information:
+ * The first way:
+ * 'userModel' => 'some/service.ModelName'
+ * The second way:
+ * 'userModel' => [
+ *        'service' => 'some/service',
+ *        'name' => 'ModelName'
+ * ]
+ */
 class OAuth2AuthenticationGate implements AuthenticationInterface, FusionComponentInterface
 {
 	use FusionComponentTrait;
@@ -40,20 +50,8 @@ class OAuth2AuthenticationGate implements AuthenticationInterface, FusionCompone
 
 	private int $authProblem;
 
-	/**
-	 * Configuration has to have user model information:
-	 * The first way:
-	 * 'userModel' => 'some/service.ModelName'
-	 * The second way:
-	 * 'userModel' => [
-	 *        'service' => 'some/service',
-	 *        'name' => 'ModelName'
-	 * ]
-	 */
-	public function __construct(iterable $config = [])
+	protected function init(): void
 	{
-        $this->__objectConstruct($config);
-
 		$this->authProblem = self::AUTH_PROBLEM_NO;
 	}
 

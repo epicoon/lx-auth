@@ -5,9 +5,6 @@ namespace lx\auth\sys\models;
 use lx\model\Model;
 
 /**
- * Class AccessTokenMediator
- * @package lx\auth\sys\models
- *
  * @property string $token
  * @property string $userAuthValue
  * @property string $expire

@@ -7,9 +7,6 @@ use lx\model\modelTools\RelatedModelsCollection;
 use lx\auth\models\Role;
 
 /**
- * Class UserRoleMediator
- * @package lx\auth\sys\models
- *
  * @property string $userAuthValue
  * @property RelatedModelsCollection&Role[] $roles
  */

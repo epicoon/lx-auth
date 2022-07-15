@@ -8,8 +8,10 @@ use lx\UserManagerInterface;
 
 class Plugin extends lxPlugin
 {
-    public function init(): void
+    protected function init(): void
     {
+        parent::init();
+        
         $userManager = lx::$app->userManager;
         $this->attributes->userModel = $userManager ? $userManager->getUserModelName() : '';
     }
