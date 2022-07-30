@@ -5,11 +5,11 @@ namespace lx\auth\modules;
 use lx;
 use lx\Module;
 use lx\ResponseCodeEnum;
-use lx\ResponseInterface;
+use lx\HttpResponseInterface;
 
 class TokenUpdater extends Module
 {
-    public function tryAuthenticate(): ResponseInterface
+    public function tryAuthenticate(): HttpResponseInterface
     {
         $gate = lx::$app->authenticationGate;
         if ($gate->authenticateUser()) {
@@ -29,7 +29,7 @@ class TokenUpdater extends Module
         return $this->prepareErrorResponse('Internal server error', ResponseCodeEnum::SERVER_ERROR);
     }
     
-    public function refreshTokens($refreshToken): ResponseInterface
+    public function refreshTokens($refreshToken): HttpResponseInterface
     {
         $gate = lx::$app->authenticationGate;
 

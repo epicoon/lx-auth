@@ -10,7 +10,7 @@ use lx\auth\models\UserRole;
 use lx\model\modelTools\ModelsSerializer;
 use lx\model\plugins\relationManager\server\Respondent;
 use lx\model\Model;
-use lx\ResponseInterface;
+use lx\HttpResponseInterface;
 use lx\FlightRecorderHolderTrait;
 use lx\FlightRecorderHolderInterface;
 
@@ -18,7 +18,7 @@ class UserRoleRespondent extends Respondent implements FlightRecorderHolderInter
 {
     use FlightRecorderHolderTrait;
     
-	public function getCoreData(array $attributes): ResponseInterface
+	public function getCoreData(array $attributes): HttpResponseInterface
 	{
 	    $userModelName = $attributes['userModel'];
 
@@ -36,7 +36,7 @@ class UserRoleRespondent extends Respondent implements FlightRecorderHolderInter
         string $modelName,
         string $relationName,
         array $filters
-    ): ResponseInterface
+    ): HttpResponseInterface
     {
         $modelClass = $this->defineModelClass($serviceName, $modelName);
         if ($this->hasFlightRecords()) {
@@ -108,7 +108,7 @@ class UserRoleRespondent extends Respondent implements FlightRecorderHolderInter
         int $pk0,
         string $relationName,
         int $pk1
-    ): ?ResponseInterface
+    ): ?HttpResponseInterface
 	{
 	    /** @var UserManagerInterface $userManager */
 	    $userManager = lx::$app->userManager;
@@ -128,7 +128,7 @@ class UserRoleRespondent extends Respondent implements FlightRecorderHolderInter
         int $pk0,
         string $relationName,
         int $pk1
-    ): ?ResponseInterface
+    ): ?HttpResponseInterface
 	{
         /** @var UserManagerInterface $userManager */
         $userManager = lx::$app->userManager;
@@ -142,7 +142,7 @@ class UserRoleRespondent extends Respondent implements FlightRecorderHolderInter
         return null;
 	}
 
-    public function createModel(string $serviceName, string $modelName, array $fields): ?ResponseInterface
+    public function createModel(string $serviceName, string $modelName, array $fields): ?HttpResponseInterface
 	{
         $modelClass = $this->defineModelClass($serviceName, $modelName);
 		if ($modelClass == Role::class) {
@@ -170,7 +170,7 @@ class UserRoleRespondent extends Respondent implements FlightRecorderHolderInter
 		return null;
 	}
 
-    public function deleteModel(string $serviceName, string $modelName, int $pk): ?ResponseInterface
+    public function deleteModel(string $serviceName, string $modelName, int $pk): ?HttpResponseInterface
 	{
         $modelClass = $this->defineModelClass($serviceName, $modelName);
         if ($modelClass == Role::class) {

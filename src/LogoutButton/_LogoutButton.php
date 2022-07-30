@@ -4,7 +4,7 @@ namespace lx\auth;
 
 use lx;
 use lx\Module;
-use lx\ResponseInterface;
+use lx\HttpResponseInterface;
 
 class LogoutButton extends Module
 {

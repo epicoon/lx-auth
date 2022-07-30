@@ -300,13 +300,13 @@ class OAuth2AuthenticationGate implements AuthenticationInterface, FusionCompone
 	{
 		$token = null;
 
-		$authHeader = lx::$app->dialog->getHeader('Authorization');
+		$authHeader = lx::$app->request->getHeader('Authorization');
 		if ($authHeader) {
 			$token = $authHeader;
 		}
 
 		if ($token === null) {
-            $authCookie = lx::$app->dialog->getCookie()->getFirstDefined(
+            $authCookie = lx::$app->request->getCookie()->getFirstDefined(
                 ['auth', 'authorization', 'token'],
                 false
             );

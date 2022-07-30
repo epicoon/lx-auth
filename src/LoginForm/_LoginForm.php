@@ -6,12 +6,12 @@ use lx;
 use lx\AuthenticationInterface;
 use lx\Module;
 use lx\ResponseCodeEnum;
-use lx\ResponseInterface;
+use lx\HttpResponseInterface;
 use lx\UserManagerInterface;
 
 class LoginForm extends Module
 {
-	public function login(string $login, string $password): ResponseInterface
+	public function login(string $login, string $password): HttpResponseInterface
     {
 		$userManager = lx::$app->userManager;
 
@@ -33,7 +33,7 @@ class LoginForm extends Module
         ]);
     }
 
-	public function register(string $login, string $password): ResponseInterface
+	public function register(string $login, string $password): HttpResponseInterface
     {
 		$userManager = lx::$app->userManager;
 		if ( ! $userManager) {
