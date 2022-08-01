@@ -5,7 +5,7 @@ namespace lx\auth;
 use lx;
 use lx\AuthenticationInterface;
 use lx\Module;
-use lx\ResponseCodeEnum;
+use lx\HttpResponse;
 use lx\HttpResponseInterface;
 use lx\UserManagerInterface;
 
@@ -19,7 +19,7 @@ class LoginForm extends Module
 		if (!$user) {
 		    return $this->prepareErrorResponse(
 		        'User not found',
-                ResponseCodeEnum::NOT_FOUND,
+                HttpResponse::NOT_FOUND,
             );
 		}
 

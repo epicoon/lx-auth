@@ -306,7 +306,7 @@ class OAuth2AuthenticationGate implements AuthenticationInterface, FusionCompone
 		}
 
 		if ($token === null) {
-            $authCookie = lx::$app->request->getCookie()->getFirstDefined(
+            $authCookie = lx::$app->cookie->getFirstDefined(
                 ['auth', 'authorization', 'token'],
                 false
             );

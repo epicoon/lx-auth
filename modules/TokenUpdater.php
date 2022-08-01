@@ -4,7 +4,7 @@ namespace lx\auth\modules;
 
 use lx;
 use lx\Module;
-use lx\ResponseCodeEnum;
+use lx\HttpResponse;
 use lx\HttpResponseInterface;
 
 class TokenUpdater extends Module
@@ -19,14 +19,14 @@ class TokenUpdater extends Module
         }
 
         if ($gate->isTokenExpired()) {
-            return $this->prepareErrorResponse('expired', ResponseCodeEnum::UNAUTHORIZED);
+            return $this->prepareErrorResponse('expired', HttpResponse::UNAUTHORIZED);
         }
 
         if ($gate->isTokenNotFound()) {
-            return $this->prepareErrorResponse('token not found', ResponseCodeEnum::UNAUTHORIZED);
+            return $this->prepareErrorResponse('token not found', HttpResponse::UNAUTHORIZED);
         }
 
-        return $this->prepareErrorResponse('Internal server error', ResponseCodeEnum::SERVER_ERROR);
+        return $this->prepareErrorResponse('Internal server error', HttpResponse::SERVER_ERROR);
     }
     
     public function refreshTokens($refreshToken): HttpResponseInterface
@@ -38,12 +38,12 @@ class TokenUpdater extends Module
             if ($gate->isTokenExpired()) {
                 return $this->prepareErrorResponse(
                     'expired',
-                    ResponseCodeEnum::UNAUTHORIZED
+                    HttpResponse::UNAUTHORIZED
                 );
             } else {
                 return $this->prepareErrorResponse(
                     'Resource is unavailable',
-                    ResponseCodeEnum::FORBIDDEN
+                    HttpResponse::FORBIDDEN
                 );
             }
         }
