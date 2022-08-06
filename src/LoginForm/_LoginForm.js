@@ -26,7 +26,7 @@ class LoginForm extends lx.Box {
 		};
 	}
 
-	static initCssAsset(css) {
+	static initCss(css) {
 		css.inheritClass('lx-auth-LoginForm', 'AbstractBox');
 		css.addClass('lx-auth-LoginForm-back', {
 			opacity: 0.5,

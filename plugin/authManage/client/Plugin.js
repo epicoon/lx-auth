@@ -1,5 +1,5 @@
 class Plugin extends lx.Plugin {
-    initCssAsset(css) {
+    initCss(css) {
         css.addClass('lx-auth-back', {
             backgroundColor: this.cssPreset.altMainBackgroundColor,
         });
