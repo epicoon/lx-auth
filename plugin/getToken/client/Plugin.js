@@ -25,12 +25,12 @@ class Plugin extends lx.Plugin {
 						form.on('authenticate', ()=>window.location.reload());
 						break;
 					case 403:
-						lx.Tost.warning('Resource is unavailable');
+						lx.tostWarning('Resource is unavailable');
 						break;
 					case 404:
-						lx.Tost.warning('User not found');
+						lx.tostWarning('User not found');
 						break;
-					default: lx.Tost.error(error.error_details || 'Internal server error');
+					default: lx.tostError(error.error_details || 'Internal server error');
 				}
 			});
 	}

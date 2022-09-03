@@ -22,7 +22,7 @@ class TokenUpdater extends lx.Module {
     }
 
     run() {
-        let token = lx.Storage.get('lxauthtoken');
+        let token = lx.app.storage.get('lxauthtoken');
         if (!token) {
             setTimeout(()=>this.__runRejected({error_code: 401}), 100);
             return this;
@@ -39,7 +39,7 @@ class TokenUpdater extends lx.Module {
     __trySendToken() {
         ^self::tryAuthenticate()
             .then(res=>{
-                lx.User.set(res.data);
+                lx.app.user.set(res.data);
                 this.__runAccepted()
             })
             .catch(res=>{
@@ -49,7 +49,7 @@ class TokenUpdater extends lx.Module {
     }
 
     __tryRefreshTokens() {
-        let refreshToken = lx.Storage.get('lxauthretoken');
+        let refreshToken = lx.app.storage.get('lxauthretoken');
         if (!refreshToken) return false;
 
         ^self::refreshTokens(refreshToken)
@@ -58,9 +58,9 @@ class TokenUpdater extends lx.Module {
                     this.__runRejected(res);
                     return;
                 }
-                lx.Storage.set('lxauthtoken', res.data.accessToken);
-                lx.Storage.set('lxauthretoken', res.data.refreshToken);
-                lx.User.set(res.data.userData);
+                lx.app.storage.set('lxauthtoken', res.data.accessToken);
+                lx.app.storage.set('lxauthretoken', res.data.refreshToken);
+                lx.app.user.set(res.data.userData);
                 this.__runAccepted();
             })
             .catch(res=>{

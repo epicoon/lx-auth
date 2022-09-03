@@ -78,14 +78,14 @@ class LoginForm extends lx.Box {
 		form->send.click(()=>{
 			^self::login(form->login.value(), form->password.value())
 				.then(res=>__applyTokens(this, res.data.token, res.data.refreshToken))
-				.catch(res=>lx.Tost.error(res.error_details));
+				.catch(res=>lx.tostError(res.error_details));
 		});
 
 		if (form.contains('register')) {
 			form->register.click(()=>{
 				^self::register(form->login.value(), form->password.value())
 					.then(res=>__applyTokens(this, res.data.token, res.data.refreshToken))
-					.catch(res=>lx.Tost.error(res.error_details));
+					.catch(res=>lx.tostError(res.error_details));
 			});
 		}
 
@@ -97,8 +97,8 @@ class LoginForm extends lx.Box {
 
 #lx:client {
 	function __applyTokens(self, token, refreshToken) {
-		lx.Storage.set('lxauthtoken', token);
-		lx.Storage.set('lxauthretoken', refreshToken);
+		lx.app.storage.set('lxauthtoken', token);
+		lx.app.storage.set('lxauthretoken', refreshToken);
 		
 		self.trigger('authenticate');
 	}

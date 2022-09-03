@@ -1,20 +1,20 @@
 #lx:module lx.auth.AjaxAuthHandler;
 
-lx.subscribe(lx.EVENT_BEFORE_AJAX_REQUEST, function (request) {
-    let token = lx.Storage.get('lxauthtoken');
+lx.app.lifeCycle.subscribe(lx.EVENT_BEFORE_AJAX_REQUEST, function (request) {
+    let token = lx.app.storage.get('lxauthtoken');
     if (!token) return;
     request.setRequestHeader('Authorization', token);
 });
 
-lx.subscribe(lx.EVENT_AJAX_REQUEST_UNAUTHORIZED, function (response, request, options) {
+lx.app.lifeCycle.subscribe(lx.EVENT_AJAX_REQUEST_UNAUTHORIZED, function (response, request, options) {
     // Ignore self ajax-requests
     if (options.headers['lx-module'] == 'lx.auth.TokenUpdater:tryAuthenticate'
         || options.headers['lx-module'] == 'lx.auth.TokenUpdater:refreshTokens'
     ) return;
 
-    lx.dependencies.promiseModules(['lx.auth.TokenUpdater', 'lx.auth.LoginForm'], ()=>{
+    lx.app.dependencies.promiseModules(['lx.auth.TokenUpdater', 'lx.auth.LoginForm'], ()=>{
         (new lx.auth.TokenUpdater()).run()
-            .onAccepted(()=>lx.Dialog.request(options))
+            .onAccepted(()=>lx.app.dialog.request(options))
             .onRejected(error=>{
                 switch (error.error_code) {
                     case 401:
@@ -24,16 +24,16 @@ lx.subscribe(lx.EVENT_AJAX_REQUEST_UNAUTHORIZED, function (response, request, op
                         });
                         form.on('authenticate', ()=>{
                             form.del();
-                            lx.Dialog.request(options)
+                            lx.app.dialog.request(options)
                         });
                         break;
                     case 403:
-                        lx.Tost.warning('Resource is unavailable');
+                        lx.tostWarning('Resource is unavailable');
                         break;
                     case 404:
-                        lx.Tost.warning('User not found');
+                        lx.tostWarning('User not found');
                         break;
-                    default: lx.Tost.error(error.error_details || 'Internal server error');
+                    default: lx.tostError(error.error_details || 'Internal server error');
                 }
             });
     });
