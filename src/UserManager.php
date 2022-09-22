@@ -166,7 +166,7 @@ class UserManager implements UserManagerInterface, FusionComponentInterface
         }
 
         $user = $this->wrapUpUserModel($userModel);
-        lx::$app->events->trigger(UserEventsEnum::AFTER_USER_CREATED, $user);
+        lx::$app->events->trigger(UserEventsEnum::AFTER_USER_CREATED, ['user' => $user]);
         return $user;
 	}
 
@@ -180,7 +180,7 @@ class UserManager implements UserManagerInterface, FusionComponentInterface
 			return;
 		}
 
-		lx::$app->events->trigger(UserEventsEnum::BEFORE_USER_DELETE, $user);
+		lx::$app->events->trigger(UserEventsEnum::BEFORE_USER_DELETE, ['user' => $user]);
 		$user->getModel()->delete();
 	}
 	

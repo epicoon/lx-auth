@@ -7,6 +7,7 @@ use lx\auth\models\AccessToken;
 use lx\auth\models\RefreshToken;
 use lx\AuthenticationInterface;
 use lx\EventListenerTrait;
+use lx\JsModuleClientInterface;
 use lx\FusionComponentInterface;
 use lx\FusionComponentTrait;
 use lx\ModelInterface;
@@ -14,6 +15,7 @@ use lx\ResourceContext;
 use lx\UserEventsEnum;
 use lx\UserInterface;
 use lx\UserManagerInterface;
+use lx\Event;
 
 /**
  * Configuration has to have user model information:
@@ -25,7 +27,10 @@ use lx\UserManagerInterface;
  *        'name' => 'ModelName'
  * ]
  */
-class OAuth2AuthenticationGate implements AuthenticationInterface, FusionComponentInterface
+class OAuth2AuthenticationGate implements
+    AuthenticationInterface,
+    FusionComponentInterface,
+    JsModuleClientInterface
 {
 	use FusionComponentTrait;
 	use EventListenerTrait;
@@ -378,8 +383,11 @@ class OAuth2AuthenticationGate implements AuthenticationInterface, FusionCompone
      * EVENT HANDLERS
      * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	private function onUserDelete(UserInterface $user): void
+	private function onUserDelete(Event $event): void
 	{
+        /** @var UserInterface $user */
+        $user = $event->getPayload('user');
+
 		$userAuthValue = $user->getAuthValue();
 		RefreshToken::deleteAll(['userAuthValue' => $userAuthValue]);
         AccessToken::deleteAll(['userAuthValue' => $userAuthValue]);

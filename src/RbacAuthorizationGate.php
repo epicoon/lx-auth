@@ -2,6 +2,7 @@
 
 namespace lx\auth;
 
+use lx\Event;
 use lx\Plugin;
 use lx\Service;
 use lx\ArrayHelper;
@@ -144,13 +145,18 @@ class RbacAuthorizationGate implements AuthorizationInterface, FusionComponentIn
 	 * EVENT HANDLERS
 	 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	private function onNewUser(UserInterface $user): void
+	private function onNewUser(Event $event): void
 	{
+        /** @var UserInterface $user */
+        $user = $event->getPayload('user');
 	    $this->setUserRoles($user, $this->getNewUserRoles());
 	}
 
-	private function onUserDelete(UserInterface $user): void
+	private function onUserDelete(Event $event): void
 	{
+        /** @var UserInterface $user */
+        $user = $event->getPayload('user');
+
         $userRole = UserRole::findOne(['userAuthValue' => $user->getAuthValue()]);
         if (!$userRole) {
             return;
