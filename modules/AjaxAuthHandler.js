@@ -12,10 +12,10 @@ lx.app.lifeCycle.subscribe(lx.EVENT_AJAX_REQUEST_UNAUTHORIZED, function (respons
         || options.headers['lx-module'] == 'lx.auth.TokenUpdater:refreshTokens'
     ) return;
 
-    lx.add.loader.loadModules({
+    lx.app.loader.loadModules({
         modules: ['lx.auth.TokenUpdater', 'lx.auth.LoginForm'],
         callback: ()=>{
-            (new lx.auth.TokenUpdater()).run()
+            (new lx.auth.TokenUpdater()).refresh()
                 .onAccepted(()=>lx.app.dialog.request(options))
                 .onRejected(error=>{
                     switch (error.error_code) {

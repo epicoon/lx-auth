@@ -31,7 +31,16 @@ class TokenUpdater extends lx.Module {
         this.__trySendToken();
         return this;
     }
-    
+
+    refresh() {
+        if (!this.__tryRefreshTokens())
+            this.__runRejected({
+                error_code: 401,
+                error_details: 'expired'
+            });
+        return this;
+    }
+
     reject(error) {
         this.__runRejected(error);
     }
