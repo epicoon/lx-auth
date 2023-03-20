@@ -196,9 +196,8 @@ class UserManager implements UserManagerInterface, FusionComponentInterface
 	private function wrapUpUserModel(ModelInterface $userModel, ?UserInterface $user = null): UserInterface
     {
         if ($user === null) {
-            $class = get_class(lx::$app->user);
             /** @var UserInterface $user */
-            $user = lx::$app->diProcessor->create($class);
+            $user = lx::$app->diProcessor->create(UserInterface::class);
         }
         
         $user->setModel($userModel);
