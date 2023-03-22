@@ -6,15 +6,18 @@ actions:
         token:
           type: string
           required: false
-          size: 256
+          details:
+            size: 256
         userAuthValue:
           type: string
           required: false
-          size: 256
+          details:
+            size: 256
         expire:
           type: string
           required: false
-          size: 256
+          details:
+            size: 256
   - type: createTable
     schema:
       name: DefaultList
@@ -22,11 +25,13 @@ actions:
         type:
           type: string
           required: false
-          size: 256
+          details:
+            size: 256
         value:
           type: string
           required: false
-          size: 256
+          details:
+            size: 256
   - type: createTable
     schema:
       name: RefreshToken
@@ -34,15 +39,18 @@ actions:
         token:
           type: string
           required: false
-          size: 256
+          details:
+            size: 256
         userAuthValue:
           type: string
           required: false
-          size: 256
+          details:
+            size: 256
         expire:
           type: string
           required: false
-          size: 256
+          details:
+            size: 256
   - type: createTable
     schema:
       name: Right
@@ -50,7 +58,8 @@ actions:
         name:
           type: string
           required: false
-          size: 256
+          details:
+            size: 256
   - type: createTable
     schema:
       name: Role
@@ -58,7 +67,8 @@ actions:
         name:
           type: string
           required: false
-          size: 256
+          details:
+            size: 256
   - type: createTable
     schema:
       name: UserRole
@@ -66,4 +76,5 @@ actions:
         userAuthValue:
           type: string
           required: false
-          size: 256
+          details:
+            size: 256
