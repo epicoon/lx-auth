@@ -83,7 +83,17 @@ class LoginForm extends lx.Box {
 
 		if (form.contains('register')) {
 			form->register.click(()=>{
-				^self::register(form->login.value(), form->password.value())
+				let login = form->login.value(),
+					password = form->password.value();
+				if (login == '') {
+					lx.tostWarning(#lx:i18n(lx.auth.LoginForm.LoginWarning));
+					return;
+				}
+				if (password == '') {
+					lx.tostWarning(#lx:i18n(lx.auth.LoginForm.PasswordWarning));
+					return;
+				}
+				^self::register(login, password)
 					.then(res=>__applyTokens(this, res.data.token, res.data.refreshToken))
 					.catch(res=>lx.tostError(res.error_details));
 			});

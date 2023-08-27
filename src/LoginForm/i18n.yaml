@@ -4,6 +4,8 @@ en-EN:
   lx.auth.LoginForm.Send: Send
   lx.auth.LoginForm.Register: Register
   lx.auth.LoginForm.Close: Close
+  lx.auth.LoginForm.LoginWarning: You have to enter a login
+  lx.auth.LoginForm.PasswordWarning: We recomend you to make up with password
 
 ru-RU:
   lx.auth.LoginForm.Login: Логин
@@ -11,3 +13,5 @@ ru-RU:
   lx.auth.LoginForm.Send: Отправить
   lx.auth.LoginForm.Register: Зарегистрироваться
   lx.auth.LoginForm.Close: Закрыть
+  lx.auth.LoginForm.LoginWarning: Введите логин
+  lx.auth.LoginForm.PasswordWarning: Рекомендуем придумать пароль
