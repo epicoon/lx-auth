@@ -275,9 +275,12 @@ class OAuth2AuthenticationGate implements
     {
         $tokenModel = $tokenClass::findOne(['token' => $token], false);
         if (!$tokenModel) {
+            $tokens = $tokenClass::find();
+            $tokens = lx\ArrayHelper::getColumn($tokens, 'token');
+            $tokens = implode(', ', $tokens);
             \lx::devLog(['_'=>[__FILE__,__CLASS__,__METHOD__,__LINE__],
                 '__trace__' => debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT&DEBUG_BACKTRACE_IGNORE_ARGS),
-                'msg' => "Auth token '$token' not found",
+                'msg' => "Auth token '$token' not found. Token class: $tokenClass. In DB: $tokens",
             ]);
 
             $this->authProblem = self::AUTH_PROBLEM_TOKEN_NOT_FOUND;
