@@ -8,9 +8,7 @@ lx.app.lifeCycle.subscribe(lx.EVENT_BEFORE_AJAX_REQUEST, function (request) {
 
 lx.app.lifeCycle.subscribe(lx.EVENT_AJAX_REQUEST_UNAUTHORIZED, function (response, request, options) {
     // Ignore self ajax-requests
-    if (options.headers['lx-module'] == 'lx.auth.TokenUpdater:tryAuthenticate'
-        || options.headers['lx-module'] == 'lx.auth.TokenUpdater:refreshTokens'
-    ) return;
+    if (options.data && options.data.moduleName == 'lx.auth.TokenUpdater') return;
 
     lx.app.loader.loadModules({
         modules: ['lx.auth.TokenUpdater', 'lx.auth.LoginForm'],

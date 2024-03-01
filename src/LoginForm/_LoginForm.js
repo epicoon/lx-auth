@@ -41,8 +41,8 @@ class LoginForm extends lx.Box {
 	 * {Boolean} closeButton
 	 * }
 	 */
-	build(config) {
-		super.build(config);
+	render(config) {
+		super.render(config);
 
 		this.add(lx.Rect, {geom: true, css: this.basicCss.background});
 		const form = this.add(lx.Box, {key: 'form', geom: [30, 20, 40, 40], css: this.basicCss.form});
@@ -70,8 +70,8 @@ class LoginForm extends lx.Box {
 			form.add(lx.Button, {width, key: 'close', text: #lx:i18n(lx.auth.LoginForm.Close)});
 	}
 
-	#lx:client clientBuild(config) {
-		super.clientBuild(config);
+	#lx:client clientRender(config) {
+		super.clientRender(config);
 
 		const form = this->form;
 

@@ -7,8 +7,8 @@
 
 #lx:namespace lx.auth;
 class LogoutButton extends lx.Button {
-	#lx:client clientBuild(config) {
-		super.clientBuild(config);
+	#lx:client clientRender(config) {
+		super.clientRender(config);
 
 		this.click(()=>{
 			^self::logout().then((res)=>location.reload());
